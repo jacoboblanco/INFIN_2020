@@ -36,6 +36,104 @@
 #define SERVER_PORT_NUM		5001
 
 
+//PROTOTIPOS DE FUNCIONES
+
+void ImprimirMenu(void);
+
+
+//FUNCION DE MOSTRAR EL MENU
+
+void ImprimirMenu(void)
+{
+	char input;
+	int v;
+	int t1;
+	int nmediana;
+	char mensaje[200]; /*ESTA VARIABLE ES PARA ALMACENAR LO QUE DEBERIA ENVIARLE AL SERVIDOR DEPENDIENDO DE LA OPCION QUE SE ELIJA*/
+
+	printf("\n\nMenu:\n");
+	printf("--------------------\n");
+	printf("1: Muestra nas antigua\n");
+	printf("2: Muestra maxima\n");
+	printf("3: Muestra minima\n");
+	printf("4: Reset de muestra maxima y minima\n");
+	printf("5: Numero de muestras\n");
+	printf("6: Marcha con tiempo de muestreo y mediana de valor de las muestras\n");
+	printf("s: Paro\n");
+	printf("--------------------\n");
+
+	input = getchar();
+
+	while (input != 's')
+	{
+		switch (input)
+		{
+			case '1':
+				printf("Has pedido la muestra mas antigua\n");
+				sprintf(mensaje, "{U}\n");
+				ImprimirMenu();                             
+				break;
+			
+			case '2':
+				printf("Has pedido la muestra maxima\n");	
+				sprintf(mensaje, "{X}\n");
+				ImprimirMenu();                             
+				break;
+			
+			case '3':
+				printf("Has pedido la muestra minima\n");	
+				sprintf(mensaje, "{Y}\n");
+				ImprimirMenu();                             
+				break;
+			
+			case '4':
+				printf("Has reseteado el valor maximo y minimo\n");	
+				sprintf(mensaje, "{R}\n");
+				ImprimirMenu();                             
+				break;
+			
+			case '5':
+				printf("Has pedido el numero de muestras\n");	
+				sprintf(mensaje, "{B}\n");
+				ImprimirMenu();                             
+				break;
+			
+			case '6':
+				
+				printf("Seleccione el modo que desea: 1 (marcha) o 2 (paro)\n");
+				scanf("%d",&v);
+				if(v==1){
+					printf("Has puesto el modo marcha porfavor ingrese el tiempo de muestreo que desea en segundos: \n");
+					scanf("%d",&t1);
+					printf("Ingrese el numero de muestras de las que desea hacer la mediana: \n");
+					scanf("%d",&nmediana);
+					printf("Se hara el muestreo de %d segundos y se hara la media con %d muestras\n",t1,nmediana);
+					sprintf(mensaje, "{M %d %d %d}\n",v,t1, nmediana);
+					ImprimirMenu();                             
+					break;
+				}
+				else {
+					printf("Ha puesto el modo paro");
+					sprintf(mensaje, "{M 0 0 0}\n");
+					ImprimirMenu();
+					break;
+					}
+				
+				
+			case 0x0a: //Això és per enviar els 0x0a (line feed) que s'envia quan li donem al Enter
+				break;
+			
+			default:
+				printf("Opció incorrecta\n");	
+				printf("He llegit 0x%hhx \n",input);
+				break;
+		}
+
+		input = getchar();
+
+	}
+	
+}
 
  /************************
 *
@@ -52,7 +150,7 @@ int main(int argc, char *argv[]){
 	int			mlen;
 	int 		result;
 	char		buffer[256];
-	char		missatge[] = "#1";
+	char		missatge[200];
 
 	/*Crear el socket*/
 	sFd=socket(AF_INET,SOCK_STREAM,0);
@@ -73,6 +171,8 @@ int main(int argc, char *argv[]){
 	}
 	printf("\nConnexió establerta amb el servidor: adreça %s, port %d\n",	inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port));
 
+	ImprimirMenu();
+	
 	/*Enviar*/
 	strcpy(buffer,missatge); //Copiar missatge a buffer
 	result = write(sFd, buffer, strlen(buffer));
@@ -87,3 +187,4 @@ int main(int argc, char *argv[]){
 
 	return 0;
 	}
+	

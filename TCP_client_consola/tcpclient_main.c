@@ -41,26 +41,12 @@ char missatge[200];
 
 //PROTOTIPOS DE FUNCIONES
 
-void ImprimirMenu(void);
+void ImprimirMenu();
 void opciones();
 
 //FUNCION DE OPCIONES EN EL MENU
 
-<<<<<<< HEAD
 void opciones(){
-
-=======
-//FUNCION DE MOSTRAR EL MENU
-
-void ImprimirMenu(void)
-{
-	char input;
-	int v;
-	int t1;
-	int nmediana;
-	char mensaje[200]; /*VARIABLE Q ALMACENA LO QUE DEBERIA ENVIARLE AL SERVIDOR DEPENDIENDO DE LA OPCION QUE SE ELIJA*/
-	//printeamos por pantalla las diferentes opciones atribuidas a cada numero
->>>>>>> 2ec81daa6e4fb42c488c2e9e67c706b0dcb6f919
 	printf("\n\nMenu:\n");
 	printf("--------------------\n");
 	printf("1: Muestra nas antigua\n");
@@ -70,8 +56,6 @@ void ImprimirMenu(void)
 	printf("5: Numero de muestras\n");
 	printf("6: Marcha con tiempo de muestreo y mediana de valor de las muestras\n");
 	printf("--------------------\n");
-
-<<<<<<< HEAD
 	}
 
 
@@ -86,25 +70,14 @@ void ImprimirMenu()
 	
 	opciones();
 	
-	input = getchar();
-
-=======
 	input = getchar();         //le pedimos un valor al usuario
 
-	while (input != 's')      //difernete de s PORUQUE?????
-	{
->>>>>>> 2ec81daa6e4fb42c488c2e9e67c706b0dcb6f919
 		switch (input)
 		{
 			case '1':
 				printf("Has pedido la muestra mas antigua\n");
-<<<<<<< HEAD
 				sprintf(missatge, "{U}\n");
 				opciones();
-=======
-				sprintf(mensaje, "{U}\n");     //almacena en el CHAR mensaje el protocolo para el SERVIDOR
-				ImprimirMenu();                //???                  
->>>>>>> 2ec81daa6e4fb42c488c2e9e67c706b0dcb6f919
 				break;
 			
 			case '2':
@@ -201,7 +174,7 @@ int main(int argc, char *argv[]){
 	}
 	printf("\nConnexió establerta amb el servidor: adreça %s, port %d\n",	inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port));
 
-	ImprimirMenu();    //como entiende que mensaje  es = a missatge?
+	ImprimirMenu(); 
 	
 	/*Enviar*/
 	strcpy(buffer,missatge); //Copiar missatge a buffer

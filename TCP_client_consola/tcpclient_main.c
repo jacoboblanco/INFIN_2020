@@ -37,13 +37,160 @@
 
 //VARIABLES GLOBALES
 
-char missatge[200];
+char 		missatge[200];
+int			sFd;
+int			mlen;
+int 		result;
+char		buffer[256];
 
 //PROTOTIPOS DE FUNCIONES
 
-void ImprimirMenu();
+void FuncionamientoMenu();
 void opciones();
+void muestra_antigua();
+void muestra_maxima();
+void muestra_minima();
+void reset_max_min();
+void numero_muestras_array();
+void marcha_paro();
 
+//FUNCION DE MARCHA PARO
+
+void marcha_paro(){
+	
+	int v;
+	int t1;
+	int nmediana;
+
+	printf("Seleccione el modo que desea: 1 (marcha) o 0 (paro)\n");
+	scanf("%d",&v);		
+				
+			if(v==1){
+				
+				printf("Has puesto el modo marcha porfavor ingrese el tiempo de muestreo que desea en segundos: \n");
+				scanf("%d",&t1);
+				printf("Ingrese el numero de muestras de las que desea hacer la mediana: \n");
+				scanf("%d",&nmediana);
+				printf("Se hara el muestreo de %d segundos y se hara la media con %d muestras\n",t1,nmediana);
+				sprintf(missatge, "{M %d %d %d}\n",v,t1,nmediana);
+			}
+
+			else{				
+				
+				printf("Ha puesto el modo paro\n");
+				sprintf(missatge, "{M 0 0 0}\n");
+			}
+			
+			
+		
+				/*Enviar*/
+				strcpy(buffer,missatge); //Copiar missatge a buffer
+				result = write(sFd, buffer, strlen(buffer));
+				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
+
+				/*Rebre*/
+				result = read(sFd, buffer, 256);
+				printf("\nMissatge rebut del servidor(bytes %d): %s\n",	result, buffer);
+
+				opciones();
+	}
+
+
+//FUNCION DE RESETEO DEL MAXIMO Y DEL MINIMO
+
+void numero_muestras_array(){
+				
+				printf("Has pedido el numero de muestras\n");	
+				sprintf(missatge, "{B}\n");
+							
+				/*Enviar*/
+				strcpy(buffer,missatge); //Copiar missatge a buffer
+				result = write(sFd, buffer, strlen(buffer));
+				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
+
+				/*Rebre*/
+				result = read(sFd, buffer, 256);
+				printf("\nMissatge rebut del servidor(bytes %d): %s\n",	result, buffer);
+				
+				opciones();
+	}
+	
+//FUNCION DE RESETEO DEL MAXIMO Y DEL MINIMO
+
+void reset_max_min(){
+				
+				printf("Has reseteado el valor maximo y minimo\n");	
+				sprintf(missatge, "{R}\n");
+							
+				/*Enviar*/
+				strcpy(buffer,missatge); //Copiar missatge a buffer
+				result = write(sFd, buffer, strlen(buffer));
+				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
+
+				/*Rebre*/
+				result = read(sFd, buffer, 256);
+				printf("\nMissatge rebut del servidor(bytes %d): %s\n",	result, buffer);
+
+				opciones();
+	}
+
+//FUNCION DE MUESTRA MINIMA
+
+void muestra_minima(){
+	
+				printf("Has pedido la muestra minima\n");	
+				sprintf(missatge, "{Y}\n");
+							
+				/*Enviar*/
+				strcpy(buffer,missatge); //Copiar missatge a buffer
+				result = write(sFd, buffer, strlen(buffer));
+				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
+
+				/*Rebre*/
+				result = read(sFd, buffer, 256);
+				printf("\nMissatge rebut del servidor(bytes %d): %s\n",	result, buffer);
+				
+				opciones();
+	}
+
+//FUNCION DE MUESTRA MAXIMA
+
+void muestra_maxima(){
+	
+				printf("Has pedido la muestra maxima\n");	
+				sprintf(missatge, "{X}\n");
+				
+				/*Enviar*/
+				strcpy(buffer,missatge); //Copiar missatge a buffer
+				result = write(sFd, buffer, strlen(buffer));
+				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
+
+				/*Rebre*/
+				result = read(sFd, buffer, 256);
+				printf("\nMissatge rebut del servidor(bytes %d): %s\n",	result, buffer);
+
+				opciones();
+	}
+	
+//FUNCION DE MUESTRA ANTIGUA
+
+void muestra_antigua(){
+				
+				printf("Has pedido la muestra mas antigua\n");
+				sprintf(missatge, "{U}\n");
+				
+				/*Enviar*/
+				strcpy(buffer,missatge); //Copiar missatge a buffer
+				result = write(sFd, buffer, strlen(buffer));
+				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
+
+				/*Rebre*/
+				result = read(sFd, buffer, 256);
+				printf("\nMissatge rebut del servidor(bytes %d): %s\n",	result, buffer);
+
+				opciones();				
+	}
+	
 //FUNCION DE OPCIONES EN EL MENU
 
 void opciones(){
@@ -55,89 +202,64 @@ void opciones(){
 	printf("4: Reset de muestra maxima y minima\n");
 	printf("5: Numero de muestras\n");
 	printf("6: Marcha con tiempo de muestreo y mediana de valor de las muestras\n");
+	printf("s: Para salir del programa\n");
 	printf("--------------------\n");
 	}
 
 
-//FUNCION DE MOSTRAR EL MENU
+//FUNCION DE COMO FUNICONA EL MENU
 
-void ImprimirMenu()
+void FuncionamientoMenu()
 {
 	char input;
-	int v;
-	int t1;
-	int nmediana;
 	
-	opciones();
+	opciones();		//muestra el menu
 	
 	input = getchar();         //le pedimos un valor al usuario
 
+	while(input!= 's'){
+		
 		switch (input)
 		{
 			case '1':
-				printf("Has pedido la muestra mas antigua\n");
-				sprintf(missatge, "{U}\n");
-				opciones();
+				muestra_antigua();
 				break;
 			
 			case '2':
-				printf("Has pedido la muestra maxima\n");	
-				sprintf(missatge, "{X}\n");
-				opciones();
+				muestra_maxima();
 				break;
 			
 			case '3':
-				printf("Has pedido la muestra minima\n");	
-				sprintf(missatge, "{Y}\n");
-				opciones();
+				muestra_minima();
 				break;
 			
 			case '4':
-				printf("Has reseteado el valor maximo y minimo\n");	
-				sprintf(missatge, "{R}\n");
-				opciones();
+				reset_max_min();
 				break;
 			
 			case '5':
-				printf("Has pedido el numero de muestras\n");	
-				sprintf(missatge, "{B}\n");
-				opciones();
+				numero_muestras_array();
 				break;
 			
 			case '6':
-				
-				printf("Seleccione el modo que desea: 1 (marcha) o 2 (paro)\n");
-				scanf("%d",&v);
-				if(v==1){
-					printf("Has puesto el modo marcha porfavor ingrese el tiempo de muestreo que desea en segundos: \n");
-					scanf("%d",&t1);
-					printf("Ingrese el numero de muestras de las que desea hacer la mediana: \n");
-					scanf("%d",&nmediana);
-					printf("Se hara el muestreo de %d segundos y se hara la media con %d muestras\n",t1,nmediana);
-					sprintf(missatge, "{M %d %d %d}\n",v,t1, nmediana);
-					opciones();
+				marcha_paro();
 					break;
-				}
-				else {
-					printf("Ha puesto el modo paro");
-					sprintf(missatge, "{M 0 0 0}\n");
-					opciones();
-					break;
-					}
-				
-				
+
 			case 0x0a: //Això és per enviar els 0x0a (line feed) que s'envia quan li donem al Enter
 				break;
-			
+		
 			default:
 				printf("Opció incorrecta\n");	
 				printf("He llegit 0x%hhx \n",input);
 				opciones();
 				break;
 		}
-
+	input = getchar();
 	}
-	
+			/*Tancar el socket*/
+				close(sFd);
+				
+}
 
  /************************
 *
@@ -150,11 +272,7 @@ int main(int argc, char *argv[]){
 	struct sockaddr_in	serverAddr;
 	char	    serverName[] = "127.0.0.1"; //Adreça IP on est� el servidor
 	int			sockAddrSize;
-	int			sFd;
-	int			mlen;
-	int 		result;
-	char		buffer[256];
-	
+
 	/*Crear el socket*/
 	sFd=socket(AF_INET,SOCK_STREAM,0);
 
@@ -174,20 +292,8 @@ int main(int argc, char *argv[]){
 	}
 	printf("\nConnexió establerta amb el servidor: adreça %s, port %d\n",	inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port));
 
-	ImprimirMenu(); 
+	FuncionamientoMenu(); 
 	
-	/*Enviar*/
-	strcpy(buffer,missatge); //Copiar missatge a buffer
-	result = write(sFd, buffer, strlen(buffer));
-	printf("Missatge enviat a servidor(bytes %d): %s\n",	result, missatge);
-
-	/*Rebre*/
-	result = read(sFd, buffer, 256);
-	printf("Missatge rebut del servidor(bytes %d): %s\n",	result, buffer);
-
-	/*Tancar el socket*/
-	close(sFd);
-
 	return 0;
 	}
 	

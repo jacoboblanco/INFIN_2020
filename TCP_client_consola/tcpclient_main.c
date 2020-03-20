@@ -49,8 +49,8 @@ void ImprimirMenu(void)
 	int v;
 	int t1;
 	int nmediana;
-	char mensaje[200]; /*ESTA VARIABLE ES PARA ALMACENAR LO QUE DEBERIA ENVIARLE AL SERVIDOR DEPENDIENDO DE LA OPCION QUE SE ELIJA*/
-
+	char mensaje[200]; /*VARIABLE Q ALMACENA LO QUE DEBERIA ENVIARLE AL SERVIDOR DEPENDIENDO DE LA OPCION QUE SE ELIJA*/
+	//printeamos por pantalla las diferentes opciones atribuidas a cada numero
 	printf("\n\nMenu:\n");
 	printf("--------------------\n");
 	printf("1: Muestra nas antigua\n");
@@ -62,16 +62,16 @@ void ImprimirMenu(void)
 	printf("s: Paro\n");
 	printf("--------------------\n");
 
-	input = getchar();
+	input = getchar();         //le pedimos un valor al usuario
 
-	while (input != 's')
+	while (input != 's')      //difernete de s PORUQUE?????
 	{
 		switch (input)
 		{
 			case '1':
 				printf("Has pedido la muestra mas antigua\n");
-				sprintf(mensaje, "{U}\n");
-				ImprimirMenu();                             
+				sprintf(mensaje, "{U}\n");     //almacena en el CHAR mensaje el protocolo para el SERVIDOR
+				ImprimirMenu();                //???                  
 				break;
 			
 			case '2':
@@ -171,7 +171,7 @@ int main(int argc, char *argv[]){
 	}
 	printf("\nConnexió establerta amb el servidor: adreça %s, port %d\n",	inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port));
 
-	ImprimirMenu();
+	ImprimirMenu();    //como entiende que mensaje  es = a missatge?
 	
 	/*Enviar*/
 	strcpy(buffer,missatge); //Copiar missatge a buffer

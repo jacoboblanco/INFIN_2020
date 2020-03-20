@@ -35,21 +35,18 @@
 #define REPLY_MSG_SIZE		500
 #define SERVER_PORT_NUM		5001
 
+//VARIABLES GLOBALES
+
+char missatge[200];
 
 //PROTOTIPOS DE FUNCIONES
 
 void ImprimirMenu(void);
+void opciones();
 
+//FUNCION DE OPCIONES EN EL MENU
 
-//FUNCION DE MOSTRAR EL MENU
-
-void ImprimirMenu(void)
-{
-	char input;
-	int v;
-	int t1;
-	int nmediana;
-	char mensaje[200]; /*ESTA VARIABLE ES PARA ALMACENAR LO QUE DEBERIA ENVIARLE AL SERVIDOR DEPENDIENDO DE LA OPCION QUE SE ELIJA*/
+void opciones(){
 
 	printf("\n\nMenu:\n");
 	printf("--------------------\n");
@@ -59,43 +56,54 @@ void ImprimirMenu(void)
 	printf("4: Reset de muestra maxima y minima\n");
 	printf("5: Numero de muestras\n");
 	printf("6: Marcha con tiempo de muestreo y mediana de valor de las muestras\n");
-	printf("s: Paro\n");
 	printf("--------------------\n");
 
+	}
+
+
+//FUNCION DE MOSTRAR EL MENU
+
+void ImprimirMenu()
+{
+	char input;
+	int v;
+	int t1;
+	int nmediana;
+	
+	opciones();
+	
 	input = getchar();
 
-	while (input != 's')
-	{
 		switch (input)
 		{
 			case '1':
 				printf("Has pedido la muestra mas antigua\n");
-				sprintf(mensaje, "{U}\n");
-				ImprimirMenu();                             
+				sprintf(missatge, "{U}\n");
+				opciones();
 				break;
 			
 			case '2':
 				printf("Has pedido la muestra maxima\n");	
-				sprintf(mensaje, "{X}\n");
-				ImprimirMenu();                             
+				sprintf(missatge, "{X}\n");
+				opciones();
 				break;
 			
 			case '3':
 				printf("Has pedido la muestra minima\n");	
-				sprintf(mensaje, "{Y}\n");
-				ImprimirMenu();                             
+				sprintf(missatge, "{Y}\n");
+				opciones();
 				break;
 			
 			case '4':
 				printf("Has reseteado el valor maximo y minimo\n");	
-				sprintf(mensaje, "{R}\n");
-				ImprimirMenu();                             
+				sprintf(missatge, "{R}\n");
+				opciones();
 				break;
 			
 			case '5':
 				printf("Has pedido el numero de muestras\n");	
-				sprintf(mensaje, "{B}\n");
-				ImprimirMenu();                             
+				sprintf(missatge, "{B}\n");
+				opciones();
 				break;
 			
 			case '6':
@@ -108,14 +116,14 @@ void ImprimirMenu(void)
 					printf("Ingrese el numero de muestras de las que desea hacer la mediana: \n");
 					scanf("%d",&nmediana);
 					printf("Se hara el muestreo de %d segundos y se hara la media con %d muestras\n",t1,nmediana);
-					sprintf(mensaje, "{M %d %d %d}\n",v,t1, nmediana);
-					ImprimirMenu();                             
+					sprintf(missatge, "{M %d %d %d}\n",v,t1, nmediana);
+					opciones();
 					break;
 				}
 				else {
 					printf("Ha puesto el modo paro");
-					sprintf(mensaje, "{M 0 0 0}\n");
-					ImprimirMenu();
+					sprintf(missatge, "{M 0 0 0}\n");
+					opciones();
 					break;
 					}
 				
@@ -126,14 +134,12 @@ void ImprimirMenu(void)
 			default:
 				printf("Opció incorrecta\n");	
 				printf("He llegit 0x%hhx \n",input);
+				opciones();
 				break;
 		}
 
-		input = getchar();
-
 	}
 	
-}
 
  /************************
 *
@@ -150,8 +156,7 @@ int main(int argc, char *argv[]){
 	int			mlen;
 	int 		result;
 	char		buffer[256];
-	char		missatge[200];
-
+	
 	/*Crear el socket*/
 	sFd=socket(AF_INET,SOCK_STREAM,0);
 

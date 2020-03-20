@@ -96,7 +96,7 @@ void marcha_paro(){
 	}
 
 
-//FUNCION DE RESETEO DEL MAXIMO Y DEL MINIMO
+//FUNCION QUE MUESTRAN EL NUMERO DE MUESTRAS EN EL ARRAY
 
 void numero_muestras_array(){
 				

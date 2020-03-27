@@ -42,6 +42,9 @@ int			sFd;
 int			mlen;
 int 		result;
 char		buffer[256];
+struct sockaddr_in	serverAddr;
+char	    serverName[] = "127.0.0.1"; //Adreça IP on est� el servidor
+int			sockAddrSize;
 
 //PROTOTIPOS DE FUNCIONES
 
@@ -53,6 +56,40 @@ void muestra_minima();
 void reset_max_min();
 void numero_muestras_array();
 void marcha_paro();
+void recibir();
+void conexion();
+
+//FUNCION CONEXION
+
+void conexion(){
+
+	/*Crear el socket*/
+	sFd=socket(AF_INET,SOCK_STREAM,0);
+
+	/*Construir l'adreça*/
+	sockAddrSize = sizeof(struct sockaddr_in);
+	bzero ((char *)&serverAddr, sockAddrSize); //Posar l'estructura a zero
+	serverAddr.sin_family=AF_INET;
+	serverAddr.sin_port=htons (SERVER_PORT_NUM);
+	serverAddr.sin_addr.s_addr = inet_addr(serverName);
+	
+    /*Conexió*/
+	result = connect (sFd, (struct sockaddr *) &serverAddr, sockAddrSize);
+	if (result < 0)
+	{
+		printf("Error en establir la connexió\n");
+		exit(-1);
+	}
+	printf("\nConnexió establerta amb el servidor: adreça %s, port %d\n",	inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port));
+}
+
+//FUNCION RECIBIR
+
+void recibir(){
+             /*Rebre*/
+			result = read(sFd, buffer, 256);
+			printf("\nMissatge rebut del servidor(bytes %d): %s\n",	result, buffer);
+    }
 
 //FUNCION DE MARCHA PARO
 
@@ -80,19 +117,11 @@ void marcha_paro(){
 				printf("Ha puesto el modo paro\n");
 				sprintf(missatge, "{M 0 0 0}\n");
 			}
-			
-			
-		
+
 				/*Enviar*/
 				strcpy(buffer,missatge); //Copiar missatge a buffer
 				result = write(sFd, buffer, strlen(buffer));
 				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
-
-				/*Rebre*/
-				result = read(sFd, buffer, 256);
-				printf("\nMissatge rebut del servidor(bytes %d): %s\n",	result, buffer);
-
-				opciones();
 	}
 
 
@@ -107,31 +136,14 @@ void numero_muestras_array(){
 				strcpy(buffer,missatge); //Copiar missatge a buffer
 				result = write(sFd, buffer, strlen(buffer));
 				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
-
-				/*Rebre*/
-				result = read(sFd, buffer, 256);
-				printf("\nMissatge rebut del servidor(bytes %d): %s\n",	result, buffer);
-				
-				opciones();
 	}
-	
+
 //FUNCION DE RESETEO DEL MAXIMO Y DEL MINIMO
 
 void reset_max_min(){
 				
 				printf("Has reseteado el valor maximo y minimo\n");	
 				sprintf(missatge, "{R}\n");
-							
-				/*Enviar*/
-				strcpy(buffer,missatge); //Copiar missatge a buffer
-				result = write(sFd, buffer, strlen(buffer));
-				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
-
-				/*Rebre*/
-				result = read(sFd, buffer, 256);
-				printf("\nMissatge rebut del servidor(bytes %d): %s\n",	result, buffer);
-
-				opciones();
 	}
 
 //FUNCION DE MUESTRA MINIMA
@@ -145,18 +157,12 @@ void muestra_minima(){
 				strcpy(buffer,missatge); //Copiar missatge a buffer
 				result = write(sFd, buffer, strlen(buffer));
 				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
-
-				/*Rebre*/
-				result = read(sFd, buffer, 256);
-				printf("\nMissatge rebut del servidor(bytes %d): %s\n",	result, buffer);
-				
-				opciones();
 	}
 
 //FUNCION DE MUESTRA MAXIMA
 
 void muestra_maxima(){
-	
+
 				printf("Has pedido la muestra maxima\n");	
 				sprintf(missatge, "{X}\n");
 				
@@ -164,14 +170,8 @@ void muestra_maxima(){
 				strcpy(buffer,missatge); //Copiar missatge a buffer
 				result = write(sFd, buffer, strlen(buffer));
 				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
-
-				/*Rebre*/
-				result = read(sFd, buffer, 256);
-				printf("\nMissatge rebut del servidor(bytes %d): %s\n",	result, buffer);
-
-				opciones();
 	}
-	
+
 //FUNCION DE MUESTRA ANTIGUA
 
 void muestra_antigua(){
@@ -183,12 +183,6 @@ void muestra_antigua(){
 				strcpy(buffer,missatge); //Copiar missatge a buffer
 				result = write(sFd, buffer, strlen(buffer));
 				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
-
-				/*Rebre*/
-				result = read(sFd, buffer, 256);
-				printf("\nMissatge rebut del servidor(bytes %d): %s\n",	result, buffer);
-
-				opciones();				
 	}
 	
 //FUNCION DE OPCIONES EN EL MENU
@@ -222,28 +216,46 @@ void FuncionamientoMenu()
 		switch (input)
 		{
 			case '1':
-				muestra_antigua();
-				break;
+				conexion();
+                muestra_antigua();
+				recibir();
+                opciones();
+                break;
 			
 			case '2':
-				muestra_maxima();
-				break;
+				conexion();
+                muestra_maxima();
+				recibir();
+                opciones();
+                break;
 			
 			case '3':
-				muestra_minima();
-				break;
+				conexion();
+                muestra_minima();
+				recibir();
+                opciones();
+                break;
 			
 			case '4':
-				reset_max_min();
-				break;
+				conexion();
+                reset_max_min();
+				recibir();
+                opciones();
+                break;
 			
 			case '5':
-				numero_muestras_array();
-				break;
+				conexion();
+                numero_muestras_array();
+				recibir();
+                opciones();
+                break;
 			
 			case '6':
+                conexion();
 				marcha_paro();
-					break;
+                recibir();
+                opciones();
+                break;
 
 			case 0x0a: //Això és per enviar els 0x0a (line feed) que s'envia quan li donem al Enter
 				break;
@@ -254,46 +266,26 @@ void FuncionamientoMenu()
 				opciones();
 				break;
 		}
+
 	input = getchar();
+
 	}
 			/*Tancar el socket*/
 				close(sFd);
 				
 }
 
- /************************
+/************************
 *
 *
 * tcpClient
 *
 *
 */
+
 int main(int argc, char *argv[]){
-	struct sockaddr_in	serverAddr;
-	char	    serverName[] = "127.0.0.1"; //Adreça IP on est� el servidor
-	int			sockAddrSize;
-
-	/*Crear el socket*/
-	sFd=socket(AF_INET,SOCK_STREAM,0);
-
-	/*Construir l'adreça*/
-	sockAddrSize = sizeof(struct sockaddr_in);
-	bzero ((char *)&serverAddr, sockAddrSize); //Posar l'estructura a zero
-	serverAddr.sin_family=AF_INET;
-	serverAddr.sin_port=htons (SERVER_PORT_NUM);
-	serverAddr.sin_addr.s_addr = inet_addr(serverName);
-
-	/*Conexió*/
-	result = connect (sFd, (struct sockaddr *) &serverAddr, sockAddrSize);
-	if (result < 0)
-	{
-		printf("Error en establir la connexió\n");
-		exit(-1);
-	}
-	printf("\nConnexió establerta amb el servidor: adreça %s, port %d\n",	inet_ntoa(serverAddr.sin_addr), ntohs(serverAddr.sin_port));
 
 	FuncionamientoMenu(); 
 	
 	return 0;
-	}
-	
+}

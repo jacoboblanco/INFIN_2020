@@ -60,6 +60,103 @@
 #define REQUEST_MSG_SIZE	1024
 
 
+//VARIABLES GLOBALES
+
+char	buffer[256];
+char	missatge[300];
+struct sockaddr_in	serverAddr;
+struct sockaddr_in	clientAddr;
+unsigned int	sockAddrSize;
+int			sFd;
+int			newFd;
+int 		result;
+
+//FUNCION DE MANIPULACION DE DATOS 
+
+void manipulacion{
+            
+            if (strcmp(buffer,"{U}") == 0) {                
+                muestra_antigua();
+                enviar();
+            } 
+            else if (strcmp(buffer, "{X}") == 0 ){
+                muestra_maxima();
+                enviar();
+            }
+            else if (strcmp(buffer, "{Y}") == 0 ){
+                muestra_minima();
+                enviar();
+            }
+            else if (strcmp(buffer, "{R}") == 0 ){
+                reset_max_min();
+                enviar();
+            }
+            else if (strcmp(buffer, "{B}") == 0 ){
+                numero_muestras_array();
+                enviar();
+            }
+            else if (buffer[2] == 0 ){
+                paro();
+                enviar();
+            }
+            else if (buffer[2] == 1 ){
+                marcha();
+                enviar();
+            }
+            else sprintf(buffer,"Mensaje no corresponde a nada")
+   }
+
+//FUNCION MUESTRA ANTIGUA
+
+void muestra_antigua(){
+    
+    }
+    
+//FUNCION MUESTRA MAXIMA
+
+void muestra_maxima(){
+    
+    }
+    
+//FUNCION MUESTRA MINIMA
+
+void muestra_minima(){
+    
+    }
+    
+//FUNCION RESET MAXIMO Y MINIMO
+
+void reset_max_min(){
+    
+    }
+    
+//FUNCION NUMERO MUESTRAS
+
+void numero_muestras_array(){
+    
+    }
+
+//FUNCION PARO
+
+void paro(){
+    
+    }
+
+//FUNCION MARCHA
+
+void marcha(){
+    
+    }
+    
+//FUNCION ENVIAR
+
+void enviar(){
+        /*Enviar*/
+		strcpy(buffer,missatge); //Copiar missatge a buffer
+		result = write(newFd, buffer, strlen(buffer)+1); //+1 per enviar el 0 final de cadena
+		printf("Missatge enviat a client(bytes %d): %s\n",	result, missatge);
+}
+
 /************************
 *
 *
@@ -68,17 +165,8 @@
 *
 */
 
-int main(int argc, char *argv[])
-{
-	struct sockaddr_in	serverAddr;
-	struct sockaddr_in	clientAddr;
-	unsigned int			sockAddrSize;
-	int			sFd;
-	int			newFd;
-	int 		result;
-	char		buffer[256];
-	char		missatge[] = "#(2)(0,23.3)(10,23.3)";
-
+int main(int argc, char *argv[]) {
+    
 	/*Preparar l'adreça local*/
 	sockAddrSize=sizeof(struct sockaddr_in);
 	bzero ((char *)&serverAddr, sockAddrSize); //Posar l'estructura a zero
@@ -96,7 +184,9 @@ int main(int argc, char *argv[])
 	result = listen(sFd, SERVER_MAX_CONNECTIONS);
 	
 	/*Bucle s'acceptació de connexions*/
+
 	while(1){
+
 		printf("\nServidor esperant connexions\n");
 
 		/*Esperar conexió. sFd: socket pare, newFd: socket fill*/
@@ -107,16 +197,13 @@ int main(int argc, char *argv[])
 		memset( buffer, 0, 256 );
 		result = read(newFd, buffer, 256);
 		printf("Missatge rebut del client(bytes %d): %s\n",	result, buffer);
-
-		/*Enviar*/
-		strcpy(buffer,missatge); //Copiar missatge a buffer
-		result = write(newFd, buffer, strlen(buffer)+1); //+1 per enviar el 0 final de cadena
-		printf("Missatge enviat a client(bytes %d): %s\n",	result, missatge);
-
+        
+        manipulacion();
 		/*Tancar el socket fill*/
 		result = close(newFd);
 	}
 }
+
 
 
 

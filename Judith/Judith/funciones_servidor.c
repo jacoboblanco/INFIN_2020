@@ -19,7 +19,6 @@ void siguiente_muestra (); //Funcion que permite introducir una nueva muestra
 void cola_circular (int *muestra, int ubi);
 void max ();
 void min ();
-void envia ();
 
 	int s; //Variable para activar modo MARCHA/PARO
 	int mayor=0;
@@ -27,14 +26,14 @@ void envia ();
 	
  //Para recrear los datos obtenidos del sensor se utilizará un vector/array dinámico circular
  //Primero crearemos el vector dinámico con las siguientes variables:
-	int i, j; //Contadores
+	int i; //Contador
 	int N=7;  //Tamaño de la muestra (modificable)
 	int NN=3; //Tamaño segunda muestra
 	int *muestra; //Datos que le llega del "sensor" (muestra) -------> vector dinámico
 	
 //A continuacion crearemos el vector circular: 
 	int dades[7];  //vector almacen/mostres adquirides
-    int ubi=0;     //posicion del vector que se printea
+   	int ubi=0;     //posicion del vector que se printea
 	int t=7;       //tamaño
 	int f=0;       //frente
 	int n =0;      //numero de datos

@@ -109,13 +109,13 @@ void marcha_paro(){
 				printf("Ingrese el numero de muestras de las que desea hacer la mediana: \n");
 				scanf("%d",&nmediana);
 				printf("Se hara el muestreo de %d segundos y se hara la media con %d muestras\n",t1,nmediana);
-				sprintf(missatge, "{M %d %d %d}\n",v,t1,nmediana);
+				sprintf(missatge, "{M %d %d %d}",v,t1,nmediana);
 			}
 
 			else{				
 				
 				printf("Ha puesto el modo paro\n");
-				sprintf(missatge, "{M 0 0 0}\n");
+				sprintf(missatge, "{M 0 0 0}");
 			}
 
 				/*Enviar*/
@@ -130,7 +130,7 @@ void marcha_paro(){
 void numero_muestras_array(){
 				
 				printf("Has pedido el numero de muestras\n");	
-				sprintf(missatge, "{B}\n");
+				sprintf(missatge, "{B}");
 							
 				/*Enviar*/
 				strcpy(buffer,missatge); //Copiar missatge a buffer
@@ -143,7 +143,7 @@ void numero_muestras_array(){
 void reset_max_min(){
 				
 				printf("Has reseteado el valor maximo y minimo\n");	
-				sprintf(missatge, "{R}\n");
+				sprintf(missatge, "{R}");
                 
                 /*Enviar*/
 				strcpy(buffer,missatge); //Copiar missatge a buffer
@@ -156,7 +156,7 @@ void reset_max_min(){
 void muestra_minima(){
 	
 				printf("Has pedido la muestra minima\n");	
-				sprintf(missatge, "{Y}\n");
+				sprintf(missatge, "{Y}");
 							
 				/*Enviar*/
 				strcpy(buffer,missatge); //Copiar missatge a buffer
@@ -169,7 +169,7 @@ void muestra_minima(){
 void muestra_maxima(){
 
 				printf("Has pedido la muestra maxima\n");	
-				sprintf(missatge, "{X}\n");
+				sprintf(missatge, "{X}");
 				
 				/*Enviar*/
 				strcpy(buffer,missatge); //Copiar missatge a buffer
@@ -182,7 +182,7 @@ void muestra_maxima(){
 void muestra_antigua(){
 				
 				printf("Has pedido la muestra mas antigua\n");
-				sprintf(missatge, "{U}\n");
+				sprintf(missatge, "{U}");
 				
 				/*Enviar*/
 				strcpy(buffer,missatge); //Copiar missatge a buffer

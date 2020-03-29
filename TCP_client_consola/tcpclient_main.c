@@ -144,8 +144,13 @@ void reset_max_min(){
 				
 				printf("Has reseteado el valor maximo y minimo\n");	
 				sprintf(missatge, "{R}\n");
+                
+                /*Enviar*/
+				strcpy(buffer,missatge); //Copiar missatge a buffer
+				result = write(sFd, buffer, strlen(buffer));
+				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
 	}
-
+    
 //FUNCION DE MUESTRA MINIMA
 
 void muestra_minima(){

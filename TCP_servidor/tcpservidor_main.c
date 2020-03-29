@@ -1,3 +1,4 @@
+
 /*
  * XXXXXX.c
  * 
@@ -53,109 +54,223 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 
 #define SERVER_PORT_NUM		5001
 #define SERVER_MAX_CONNECTIONS	4
 
 #define REQUEST_MSG_SIZE	1024
 
+#define t_max 100
+
 
 //VARIABLES GLOBALES
 
 char	buffer[256];
-char	missatge[300];
+char	missatge[200];
 struct sockaddr_in	serverAddr;
 struct sockaddr_in	clientAddr;
 unsigned int	sockAddrSize;
 int			sFd;
 int			newFd;
 int 		result;
+int i=0;
+int frente=0;
+int n=0;
+int *muestra;
+float datos[t_max];
 
-//FUNCION DE MANIPULACION DE DATOS 
+//PROTOTIPOS DE FUNCIONES
 
-void manipulacion{
-            
-            if (strcmp(buffer,"{U}") == 0) {                
-                muestra_antigua();
-                enviar();
-            } 
-            else if (strcmp(buffer, "{X}") == 0 ){
-                muestra_maxima();
-                enviar();
-            }
-            else if (strcmp(buffer, "{Y}") == 0 ){
-                muestra_minima();
-                enviar();
-            }
-            else if (strcmp(buffer, "{R}") == 0 ){
-                reset_max_min();
-                enviar();
-            }
-            else if (strcmp(buffer, "{B}") == 0 ){
-                numero_muestras_array();
-                enviar();
-            }
-            else if (buffer[2] == 0 ){
-                paro();
-                enviar();
-            }
-            else if (buffer[2] == 1 ){
-                marcha();
-                enviar();
-            }
-            else sprintf(buffer,"Mensaje no corresponde a nada")
-   }
-
+void manipulacion();
+void muestra_antigua();
+void muestra_maxima();
+void muestra_minima();
+void reset_max_min();
+void numero_muestras_array();
+void paro();
+void marcha();
+void enviar();
+void adquirir_muestra(int N);
+void cola_circular(float *muestra, int x);
 //FUNCION MUESTRA ANTIGUA
 
 void muestra_antigua(){
-    
-    }
-    
-//FUNCION MUESTRA MAXIMA
 
-void muestra_maxima(){
-    
-    }
-    
-//FUNCION MUESTRA MINIMA
-
-void muestra_minima(){
-    
-    }
-    
-//FUNCION RESET MAXIMO Y MINIMO
-
-void reset_max_min(){
-    
-    }
-    
-//FUNCION NUMERO MUESTRAS
-
-void numero_muestras_array(){
-    
-    }
-
-//FUNCION PARO
-
-void paro(){
-    
-    }
-
-//FUNCION MARCHA
-
-void marcha(){
-    
-    }
-    
-//FUNCION ENVIAR
-
-void enviar(){
+        float ultimo;
+        ultimo = datos[n];
+        sprintf(missatge, "{U 0 %.2f}",ultimo);
+        frente=(frente+1)%t_max;
+        n--;
         /*Enviar*/
 		strcpy(buffer,missatge); //Copiar missatge a buffer
 		result = write(newFd, buffer, strlen(buffer)+1); //+1 per enviar el 0 final de cadena
 		printf("Missatge enviat a client(bytes %d): %s\n",	result, missatge);
 }
+
+//FUNCION RESET MAXIMO Y MINIMO
+
+void reset_max_min(){
+        
+        datos[0]=0;
+        datos[n]=0;
+        sprintf(missatge,"{R 0}");
+        
+        /*Enviar*/
+		strcpy(buffer,missatge); //Copiar missatge a buffer
+		result = write(newFd, buffer, strlen(buffer)+1); //+1 per enviar el 0 final de cadena
+		printf("Missatge enviat a client(bytes %d): %s\n",	result, missatge);
+}    
+
+//FUNCION NUMERO MUESTRAS
+
+void numero_muestras_array(){
+
+        sprintf(missatge, "{B 0 %d}",n);
+ 
+       /*Enviar*/
+		strcpy(buffer,missatge); //Copiar missatge a buffer
+		result = write(newFd, buffer, strlen(buffer)+1); //+1 per enviar el 0 final de cadena
+		printf("Missatge enviat a client(bytes %d): %s\n",	result, missatge);
+}
+
+//FUNCION MUESTRA MAXIMA
+
+void muestra_maxima(){
+        
+        float mayor;
+        mayor = datos[0]; //Le asignamos el primer elemento del array
+ 
+        for (int i=0;i<t_max;i++){
+            if (datos[i]>mayor){
+            mayor=datos[i];
+            }
+        }
+
+        sprintf(missatge, "{M 0 %.2f}",mayor);
+        
+        /*Enviar*/
+		strcpy(buffer,missatge); //Copiar missatge a buffer
+		result = write(newFd, buffer, strlen(buffer)+1); //+1 per enviar el 0 final de cadena
+		printf("Missatge enviat a client(bytes %d): %s\n",	result, missatge);
+}
+//FUNCION MUESTRA MINIMA
+
+void muestra_minima(){
+            
+        float menor;
+        menor = datos[0];
+    
+        for (int i=0;i<t_max;i++){
+            if (datos[i]<menor){
+			menor=datos[i];
+            }
+        }
+        
+        sprintf(missatge, "{M 0 %.2f}",menor);
+        
+        /*Enviar*/
+		strcpy(buffer,missatge); //Copiar missatge a buffer
+		result = write(newFd, buffer, strlen(buffer)+1); //+1 per enviar el 0 final de cadena
+		printf("Missatge enviat a client(bytes %d): %s\n",	result, missatge);
+}    
+//FUNCION PARO
+
+void paro(){
+        
+        sprintf(missatge,"{M 0}");
+        
+        /*Enviar*/
+		strcpy(buffer,missatge); //Copiar missatge a buffer
+		result = write(newFd, buffer, strlen(buffer)+1); //+1 per enviar el 0 final de cadena
+		printf("Missatge enviat a client(bytes %d): %s\n",	result, missatge);
+}
+//FUNCION MARCHA
+
+void marcha(){
+        
+        int a;
+
+        sprintf(a,"%d",buffer[7]);
+
+        adquirir_muestra(a);        
+
+        sprintf(missatge,"{M 0}");
+        
+        /*Enviar*/
+		strcpy(buffer,missatge); //Copiar missatge a buffer
+		result = write(newFd, buffer, strlen(buffer)+1); //+1 per enviar el 0 final de cadena
+		printf("Missatge enviat a client(bytes %d): %s\n",	result, missatge);
+    }
+
+//FUNCION PARA ADQUIRIR MUESTRAS EN EL ARRAY
+
+void adquirir_muestra (int N) {
+		
+    muestra = (float*)malloc(N*sizeof(float*));
+    
+		if (muestra == NULL) {
+			printf("Error array. No se ha podido reservar memoria.\n");
+		}
+        /*CREA LOS VALORES EN EL ARRAY*/
+		else {                
+            srand48(time(NULL));
+                
+            for(i=0; i<N; i++) {
+                *(muestra+i)=rand()*(40.00-15.00) + 15.00;
+                cola_circular (muestra,N);
+			}
+	}
+}
+
+//FUNCION DE GUARDAR MUESTRAS EN EL ARRAY
+        
+void cola_circular (float *muestra, int x) {
+    
+    int j=0;    
+    float media=0;
+        
+        j=(frente+n)%t_max;              
+        n++;
+        media=*(muestra+i)/x;
+        datos[j]=media;
+}
+
+
+//FUNCION DE MANIPULACION DE DATOS 
+
+void manipulacion(){
+            
+            if (strcmp(buffer,"{U}") == 0) {                
+                muestra_antigua();
+                
+            } 
+            else if (strcmp(buffer, "{X}") == 0 ){
+                muestra_maxima();
+            }
+            else if (strcmp(buffer, "{Y}") == 0 ){
+                muestra_minima();
+            }
+            else if (strcmp(buffer, "{R}") == 0 ){
+                reset_max_min();
+            }
+            else if (strcmp(buffer, "{B}") == 0 ){
+                numero_muestras_array();
+            }
+            else if (strcmp (buffer[3], "M" ) == 0 ) {
+                if (buffer[5] == '1'){
+                    marcha();
+                    }
+                
+                else {
+                paro();
+                }
+            }
+            else{ 
+                sprintf(missatge, "Mensaje no corresponde a nada");
+            }
+   }
+            
 
 /************************
 *
@@ -199,7 +314,8 @@ int main(int argc, char *argv[]) {
 		printf("Missatge rebut del client(bytes %d): %s\n",	result, buffer);
         
         manipulacion();
-		/*Tancar el socket fill*/
+		
+        /*Tancar el socket fill*/
 		result = close(newFd);
 	}
 }

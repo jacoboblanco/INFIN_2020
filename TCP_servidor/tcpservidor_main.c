@@ -1,6 +1,6 @@
 
 /*
- * XXXXXX.c
+ * Server.c
  * 
  * Copyright 2019 INFIN (EUSS) <euss@euss.cat>
  * 
@@ -26,9 +26,8 @@
                           main.c  -  server
                              -------------------
     begin                : lun feb  4 15:30:41 CET 2002
-    copyright            : (C) 2002 by A. Moreno
-    copyright            : (C) 2020 by A. Fontquerni
-    email                : amoreno@euss.es
+    copyright            : (C) Grupo C
+    email                : euss@euss.es
  ***************************************************************************/
 
 /***************************************************************************

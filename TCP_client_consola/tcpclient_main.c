@@ -195,7 +195,7 @@ void muestra_antigua(){
 void opciones(){
 	printf("\n\nMenu:\n");
 	printf("--------------------\n");
-	printf("1: Muestra nas antigua\n");
+	printf("1: Muestra mas antigua\n");
 	printf("2: Muestra maxima\n");
 	printf("3: Muestra minima\n");
 	printf("4: Reset de muestra maxima y minima\n");

@@ -77,7 +77,7 @@ int 		result;
 int i=0;
 int frente=0;
 int n=0;
-int *muestra;
+float *muestra;
 float datos[t_max];
 
 //PROTOTIPOS DE FUNCIONES
@@ -91,6 +91,7 @@ void numero_muestras_array();
 void paro();
 void marcha();
 void enviar();
+void llenar_array();
 void adquirir_muestra(int N);
 void cola_circular(float *muestra, int x);
 
@@ -99,7 +100,7 @@ void cola_circular(float *muestra, int x);
 void muestra_antigua(){
 
         float ultimo;
-        ultimo = datos[n];
+        ultimo = datos[frente];
         sprintf(missatge, "{U 0 %.2f}",ultimo);
         frente=(frente+1)%t_max;
         n--;
@@ -109,10 +110,28 @@ void muestra_antigua(){
 
 void reset_max_min(){
         
-        datos[0]=0;
-        datos[n]=0;
-        sprintf(missatge,"{R 0}");
+        float menor, mayor;
+        float *p_menor, *p_mayor;
         
+        mayor = datos[0]; 
+        menor = datos[0];
+        
+        for (int i=0;i<t_max;i++){
+            if (datos[i]>mayor){
+            p_mayor=&datos[i];
+            }
+        }
+        
+        for (int i=0;i<t_max;i++){
+            if (datos[i]<menor){
+			p_menor=&datos[i];
+            }
+        }
+        
+        p_menor = 0;
+        p_mayor = 0;
+        
+        sprintf(missatge,"{R 0}");
   }   
 
 //FUNCION NUMERO MUESTRAS
@@ -128,8 +147,8 @@ void numero_muestras_array(){
 void muestra_maxima(){
         
         float mayor;
-        mayor = datos[0]; //Le asignamos el primer elemento del array
- 
+        mayor = datos[0]; 
+        
         for (int i=0;i<t_max;i++){
             if (datos[i]>mayor){
             mayor=datos[i];
@@ -168,12 +187,14 @@ void paro(){
 //FUNCION MARCHA
 
 void marcha(){
-        
+            
+        llenar_array();
         adquirir_muestra(buffer[7]);        
 
         sprintf(missatge,"{M 0}");
         
 }
+
 //FUNCION PARA ADQUIRIR MUESTRAS EN EL ARRAY
 
 void adquirir_muestra (int N) {
@@ -188,7 +209,7 @@ void adquirir_muestra (int N) {
             srand(time(NULL));
                 
             for(i=0; i<N; i++) {
-                *(muestra+i)=rand()*(40.00-15.00) + 15.00;
+                *(muestra+i)=rand();
                 cola_circular (muestra,N);
 			}
 	}
@@ -201,8 +222,8 @@ void cola_circular (float *muestra, int x) {
     int j=0;    
     float media=0;
         
-        j=(frente+n)%t_max;              
         n++;
+        j=(frente+n)%t_max;              
         media=*(muestra+i)/x;
         datos[j]=media;
 }
@@ -222,11 +243,11 @@ void llenar_array () {
 		}
         /*CREA LOS VALORES EN EL ARRAY*/
 		else {                
+            
             srand(time(NULL));
                 
             for(i=0; i<N; i++) {
-                *(muestra+i)=rand()*(40.00-15.00) + 15.00;
-			
+                *(muestra+i)=rand();
                 j=(frente+n)%t_max;              
                 n++;
                 datos[j]=*(muestra+i);	
@@ -234,6 +255,7 @@ void llenar_array () {
         }
     printf("\nEl array se ha llenado con éxito\n");
 }
+
 
 //FUNCION DE MANIPULACION DE DATOS 
 

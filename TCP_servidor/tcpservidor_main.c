@@ -75,8 +75,9 @@ int			sFd;
 int			newFd;
 int 		result;
 int i=0;
-int frente=0;
-int n=0;
+int j=0;
+int unsigned frente=0;
+int unsigned n=0;
 float *muestra;
 float datos[t_max];
 
@@ -100,7 +101,7 @@ void cola_circular(float *muestra, int x);
 void muestra_antigua(){
 
         float ultimo;
-        ultimo = datos[frente];
+        ultimo = datos[j];
         sprintf(missatge, "{U 0 %.2f}",ultimo);
         frente=(frente+1)%t_max;
         n--;
@@ -128,7 +129,7 @@ void reset_max_min(){
             }
         }
         
-        p_menor = 0;
+        p_menor = 0;    
         p_mayor = 0;
         
         sprintf(missatge,"{R 0}");
@@ -138,7 +139,7 @@ void reset_max_min(){
 
 void numero_muestras_array(){
 
-        sprintf(missatge, "{B 0 %d}",n);
+        sprintf(missatge, "{B 0 %d}",j);
  
  }
 
@@ -206,10 +207,10 @@ void adquirir_muestra (int N) {
 		}
         /*CREA LOS VALORES EN EL ARRAY*/
 		else {                
-            srand(time(NULL));
+            srand48(time(NULL));
                 
             for(i=0; i<N; i++) {
-                *(muestra+i)=rand();
+                *(muestra+i)=drand48() * (40.00-10.05) + 10.05;
                 cola_circular (muestra,N);
 			}
 	}
@@ -219,7 +220,6 @@ void adquirir_muestra (int N) {
         
 void cola_circular (float *muestra, int x) {
     
-    int j=0;    
     float media=0;
         
         n++;
@@ -244,10 +244,10 @@ void llenar_array () {
         /*CREA LOS VALORES EN EL ARRAY*/
 		else {                
             
-            srand(time(NULL));
+            srand48(time(NULL));
                 
             for(i=0; i<N; i++) {
-                *(muestra+i)=rand();
+                *(muestra+i)=drand48() * (40.00-10.05) + 10.05;
                 j=(frente+n)%t_max;              
                 n++;
                 datos[j]=*(muestra+i);	
@@ -260,7 +260,7 @@ void llenar_array () {
 //FUNCION DE MANIPULACION DE DATOS 
 
 void manipulacion(){
-            
+    
             if (strcmp(buffer,"{U}") == 0) {                
                 muestra_antigua();
             } 
@@ -286,7 +286,7 @@ void manipulacion(){
                 }
             }
             else{ 
-                sprintf(missatge, "Mensaje no corresponde a nada");
+                sprintf(missatge,"{%c 1}",buffer[1]);
             }
    }
             

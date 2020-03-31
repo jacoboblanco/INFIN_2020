@@ -121,7 +121,7 @@ void reset_max_min(){
             if (datos[i]>mayor){
             p_mayor=&datos[i];
             }
-        }
+        }sprintf(missatge,"{R 0}");
         
         for (int i=0;i<t_max;i++){
             if (datos[i]<menor){
@@ -138,9 +138,13 @@ void reset_max_min(){
 //FUNCION NUMERO MUESTRAS
 
 void numero_muestras_array(){
-
-        sprintf(missatge, "{B 0 %d}",j);
- 
+        
+    if(n<t_max){
+            sprintf(missatge, "{B 0 %d}",n);
+    }
+        else{
+           sprintf(missatge, "{B 0 %d}",t_max);
+           }
  }
 
 //FUNCION MUESTRA MAXIMA
@@ -190,6 +194,7 @@ void paro(){
 void marcha(){
             
         llenar_array();
+        
         adquirir_muestra(buffer[7]);        
 
         sprintf(missatge,"{M 0}");
@@ -205,14 +210,16 @@ void adquirir_muestra (int N) {
 		if (muestra == NULL) {
 			printf("Error array. No se ha podido reservar memoria.\n");
 		}
+        
         /*CREA LOS VALORES EN EL ARRAY*/
-		else {                
+		
+        else {                
             srand48(time(NULL));
-                
+
             for(i=0; i<N; i++) {
                 *(muestra+i)=drand48() * (40.00-10.05) + 10.05;
                 cola_circular (muestra,N);
-			}
+                }
 	}
 }
 
@@ -224,7 +231,7 @@ void cola_circular (float *muestra, int x) {
         
         n++;
         j=(frente+n)%t_max;              
-        media=*(muestra+i)/x;
+        media =*(muestra+i)/x;
         datos[j]=media;
 }
 
@@ -256,7 +263,6 @@ void llenar_array () {
     printf("\nEl array se ha llenado con éxito\n");
 }
 
-
 //FUNCION DE MANIPULACION DE DATOS 
 
 void manipulacion(){
@@ -279,7 +285,11 @@ void manipulacion(){
             else if (buffer[1] == 'M') {
                 if (buffer[3] == '1'){
                     marcha();
+                    printf("\nArray: ");
+                    for(i=0;i<t_max;i++){
+                    printf("%.2f ",datos[i]);
                     }
+                }
                 
                 else {
                 paro();

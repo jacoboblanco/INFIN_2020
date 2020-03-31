@@ -74,7 +74,7 @@ unsigned int	sockAddrSize;
 int			sFd;
 int			newFd;
 int 		result;
-int i=0;
+int i;
 int j=0;
 int unsigned frente=0;
 int unsigned n=0;
@@ -121,8 +121,7 @@ void reset_max_min(){
             if (datos[i]>mayor){
             p_mayor=&datos[i];
             }
-        }sprintf(missatge,"{R 0}");
-        
+        }
         for (int i=0;i<t_max;i++){
             if (datos[i]<menor){
 			p_menor=&datos[i];
@@ -192,7 +191,7 @@ void paro(){
 
 void marcha(){
             
-        llenar_array();
+        //llenar_array();
         
         adquirir_muestra(buffer[7]);        
 
@@ -217,7 +216,6 @@ void adquirir_muestra (int N) {
 
             for(i=0; i<N; i++) {
                 *(muestra+i)=drand48() * (40.00-10.05) + 10.05;
-                cola_circular (muestra,N);
                 }
 	}
 }
@@ -225,13 +223,14 @@ void adquirir_muestra (int N) {
 //FUNCION DE GUARDAR MUESTRAS EN EL ARRAY
         
 void cola_circular (float *muestra, int x) {
-    
+
     float media=0;
         
-        n++;
+        
         j=(frente+n)%t_max;              
         media =*(muestra+i)/x;
         datos[j]=media;
+        n++;
 }
 
 //FUNCION DE LLENAR EL ARRAY ALEATORIAMIENTE

@@ -2,8 +2,8 @@
                           main.c  -  client
                              -------------------
     begin                : lun feb  4 16:00:04 CET 2002
-    copyright            : (C) 2002 by A. Moreno
-    email                : amoreno@euss.es
+    copyright            : (C) 2002 by Grupo C-EUSS
+    email                : euss@euss.es
  ***************************************************************************/
 
 /***************************************************************************

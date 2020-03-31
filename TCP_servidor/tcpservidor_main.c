@@ -1,6 +1,6 @@
 
 /*
- * Server.c
+ * XXXXXX.c
  * 
  * Copyright 2019 INFIN (EUSS) <euss@euss.cat>
  * 
@@ -26,8 +26,9 @@
                           main.c  -  server
                              -------------------
     begin                : lun feb  4 15:30:41 CET 2002
-    copyright            : (C) Grupo C
-    email                : euss@euss.es
+    copyright            : (C) 2002 by A. Moreno
+    copyright            : (C) 2020 by A. Fontquerni
+    email                : amoreno@euss.es
  ***************************************************************************/
 
 /***************************************************************************
@@ -140,7 +141,7 @@ void numero_muestras_array(){
         
     if(n<t_max){
             sprintf(missatge, "{B 0 %d}",n);
-    }
+            }
         else{
            sprintf(missatge, "{B 0 %d}",t_max);
            }
@@ -185,7 +186,6 @@ void muestra_minima(){
 void paro(){
         
         sprintf(missatge,"{M 0}");
-        
  }
 
 //FUNCION MARCHA
@@ -247,7 +247,9 @@ void llenar_array () {
 		if (muestra == NULL) {
 			printf("Error array. No se ha podido reservar memoria.\n");
 		}
-        /*CREA LOS VALORES EN EL ARRAY*/
+ 
+       /*CREA LOS VALORES EN EL ARRAY*/
+
 		else {                
             
             srand48(time(NULL));

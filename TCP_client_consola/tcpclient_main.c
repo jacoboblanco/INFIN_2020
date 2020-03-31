@@ -99,37 +99,37 @@ void marcha_paro(){
 	int t1;
 	int nmediana;
 
-	printf("Seleccione el modo que desea: 1 (marcha) o 0 (paro)\n");
+	printf("\nSeleccione el modo que desea: 1 (marcha) o 0 (paro): ");
 	scanf("%d",&v);		
 				
 			if(v==1){
 				
-				printf("Has puesto el modo marcha porfavor ingrese el tiempo de muestreo que desea en segundos: \n");
+				printf("\nHas puesto el modo marcha porfavor ingrese el tiempo de muestreo que desea en segundos: ");
 				scanf("%d",&t1);
-				printf("Ingrese el numero de muestras de las que desea hacer la mediana: \n");
+				printf("\nIngrese el numero de muestras de las que desea hacer la mediana: ");
 				scanf("%d",&nmediana);
-				printf("Se hara el muestreo de %d segundos y se hara la media con %d muestras\n",t1,nmediana);
-				sprintf(missatge, "{M %d %d %d}",v,t1,nmediana);
+				printf("\nSe hara el muestreo de %d segundos y se hara la media con %d muestras\n",t1,nmediana);
+				sprintf(missatge, "{M%d%d%d}",v,t1,nmediana);
 			}
 
 			else{				
 				
-				printf("Ha puesto el modo paro\n");
-				sprintf(missatge, "{M 0 0 0}");
+				printf("\nHa puesto el modo paro\n");
+				sprintf(missatge, "{M000}");
 			}
 
 				/*Enviar*/
 				strcpy(buffer,missatge); //Copiar missatge a buffer
 				result = write(sFd, buffer, strlen(buffer));
 				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
-	}
+}
 
 
 //FUNCION QUE MUESTRAN EL NUMERO DE MUESTRAS EN EL ARRAY
 
 void numero_muestras_array(){
 				
-				printf("Has pedido el numero de muestras\n");	
+				printf("\nHas pedido el numero de muestras\n");	
 				sprintf(missatge, "{B}");
 							
 				/*Enviar*/
@@ -142,20 +142,20 @@ void numero_muestras_array(){
 
 void reset_max_min(){
 				
-				printf("Has reseteado el valor maximo y minimo\n");	
+				printf("\nHas reseteado el valor maximo y minimo\n");	
 				sprintf(missatge, "{R}");
                 
                 /*Enviar*/
 				strcpy(buffer,missatge); //Copiar missatge a buffer
 				result = write(sFd, buffer, strlen(buffer));
 				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
-	}
+}
     
 //FUNCION DE MUESTRA MINIMA
 
 void muestra_minima(){
 	
-				printf("Has pedido la muestra minima\n");	
+				printf("\nHas pedido la muestra minima\n");	
 				sprintf(missatge, "{Y}");
 							
 				/*Enviar*/
@@ -168,7 +168,7 @@ void muestra_minima(){
 
 void muestra_maxima(){
 
-				printf("Has pedido la muestra maxima\n");	
+				printf("\nHas pedido la muestra maxima\n");	
 				sprintf(missatge, "{X}");
 				
 				/*Enviar*/
@@ -181,20 +181,21 @@ void muestra_maxima(){
 
 void muestra_antigua(){
 				
-				printf("Has pedido la muestra mas antigua\n");
+				printf("\nHas pedido la muestra mas antigua\n");
 				sprintf(missatge, "{U}");
 				
 				/*Enviar*/
 				strcpy(buffer,missatge); //Copiar missatge a buffer
-				result = write(sFd, buffer, strlen(buffer));
-				printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
+                result = write(sFd, buffer, strlen(buffer));
+                printf("\nMissatge enviat a servidor(bytes %d): %s\n",	result, missatge);
+				
 	}
 	
 //FUNCION DE OPCIONES EN EL MENU
 
 void opciones(){
 	printf("\n\nMenu:\n");
-	printf("--------------------\n");
+	printf("-----------------------------------------------------------\n");
 	printf("1: Muestra mas antigua\n");
 	printf("2: Muestra maxima\n");
 	printf("3: Muestra minima\n");
@@ -202,7 +203,7 @@ void opciones(){
 	printf("5: Numero de muestras\n");
 	printf("6: Marcha con tiempo de muestreo y mediana de valor de las muestras\n");
 	printf("s: Para salir del programa\n");
-	printf("--------------------\n");
+	printf("-----------RECUERDE QUE LAS UNIDADES SON ºC----------------\n");
 	}
 
 

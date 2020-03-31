@@ -80,7 +80,9 @@ int unsigned frente=0;
 int unsigned n=0;
 float *muestra;
 float datos[t_max];
-
+float menor;
+float mayor;
+        
 //PROTOTIPOS DE FUNCIONES
 
 void manipulacion();
@@ -92,117 +94,119 @@ void numero_muestras_array();
 void paro();
 void marcha();
 void enviar();
-void llenar_array();
 void adquirir_muestra(int N);
-void cola_circular(float *muestra, int x);
+void cola_circular(float sumatorio, int x);
 
 //FUNCION MUESTRA ANTIGUA
 
 void muestra_antigua(){
 
         float ultimo;
-        ultimo = datos[j];
-        sprintf(missatge, "{U 0 %.2f}",ultimo);
+        
+        if(j < 0){
+            sprintf(missatge, "{U2}");
+        }
+        else{
+        ultimo=datos[j];
+        sprintf(missatge, "{U0%.2f}",ultimo);
         frente=(frente+1)%t_max;
         n--;
+        j--;
+        }
    }
 
 //FUNCION RESET MAXIMO Y MINIMO
 
 void reset_max_min(){
         
-        float menor, mayor;
-        float *p_menor, *p_mayor;
-        
-        mayor = datos[0]; 
-        menor = datos[0];
-        
-        for (int i=0;i<t_max;i++){
-            if (datos[i]>mayor){
-            p_mayor=&datos[i];
-            }
+            mayor=0; 
+            menor=0;
+            
+            sprintf(missatge,"{R0}");
         }
-        for (int i=0;i<t_max;i++){
-            if (datos[i]<menor){
-			p_menor=&datos[i];
-            }
-        }
-        
-        p_menor = 0;    
-        p_mayor = 0;
-        
-        sprintf(missatge,"{R 0}");
-  }   
 
 //FUNCION NUMERO MUESTRAS
 
 void numero_muestras_array(){
         
-    if(n<t_max){
-            sprintf(missatge, "{B 0 %d}",n);
-            }
+        if(n<t_max){
+            sprintf(missatge, "{B0%d}",n);
+        }
+            
         else{
-           sprintf(missatge, "{B 0 %d}",t_max);
-           }
+           sprintf(missatge, "{B0%d}",t_max);
+        }
  }
 
 //FUNCION MUESTRA MAXIMA
 
 void muestra_maxima(){
-        
-        float mayor;
-        mayor = datos[0]; 
-        
-        for (int i=0;i<t_max;i++){
-            if (datos[i]>mayor){
-            mayor=datos[i];
-            }
-        }
 
-        sprintf(missatge, "{X 0 %.2f}",mayor);
+      if(n<0){
+
+            sprintf(missatge, "{X2}");
+        }
+ 
+      else{
         
-    }
+            sprintf(missatge, "{X0%.2f}",mayor);        
+        }
+}
     
 //FUNCION MUESTRA MINIMA
 
 void muestra_minima(){
-            
-        float menor;
-        menor = datos[0];
-    
-        for (int i=0;i<t_max;i++){
-            if (datos[i]<menor){
-			menor=datos[i];
+        
+        if(n<0){
+            sprintf(missatge, "{Y2}");
             }
+       
+        else{ 
+          
         }
-        
-        sprintf(missatge, "{Y 0 %.2f}",menor);
-        
+        sprintf(missatge, "{Y0%.2f}",menor);
     }
  
 //FUNCION PARO
 
 void paro(){
         
-        sprintf(missatge,"{M 0}");
+        sprintf(missatge,"{M0}");
  }
 
 //FUNCION MARCHA
 
 void marcha(){
-            
-        //llenar_array();
-        
-        adquirir_muestra(buffer[7]);        
+                   
+        adquirir_muestra(buffer[4]);        
 
-        sprintf(missatge,"{M 0}");
+        sprintf(missatge,"{M0}");
+    
+    /*LLENAR REGISTRO DE MAYOR */  
+        mayor = datos[0];
         
-}
+     for (int i=0;i<n;i++){
+                if (datos[i]>mayor){
+                mayor=datos[i];
+                }
+            }   
+    
+    /*LLENAR REGISTRO DE MENOR */
+            menor = datos[0];
+            
+        for (int i=0;i<n;i++){
+                if (datos[i]<menor){
+                menor=datos[i];
+                }
+            }     
+        }
 
 //FUNCION PARA ADQUIRIR MUESTRAS EN EL ARRAY
 
 void adquirir_muestra (int N) {
 		
+    float suma=0;
+    
     muestra = (float*)malloc(N*sizeof(float*));
     
 		if (muestra == NULL) {
@@ -216,51 +220,24 @@ void adquirir_muestra (int N) {
 
             for(i=0; i<N; i++) {
                 *(muestra+i)=drand48() * (40.00-10.05) + 10.05;
-                }
+               // printf("%.2f ;",*(muestra+i));
+                suma = suma + *(muestra+i);
+            }
+               // printf("\n%2.f",suma);
+                cola_circular (suma,N);
 	}
 }
 
 //FUNCION DE GUARDAR MUESTRAS EN EL ARRAY
         
-void cola_circular (float *muestra, int x) {
-
-    float media=0;
-        
-        
-        j=(frente+n)%t_max;              
-        media =*(muestra+i)/x;
-        datos[j]=media;
-        n++;
-}
-
-//FUNCION DE LLENAR EL ARRAY ALEATORIAMIENTE
-
-
-void llenar_array () {
-	
-            int N = t_max;
-            int j=0;
-            
-    muestra = (float*)malloc(N*sizeof(float*));
+void cola_circular (float sumatorio, int x) {
     
-		if (muestra == NULL) {
-			printf("Error array. No se ha podido reservar memoria.\n");
-		}
- 
-       /*CREA LOS VALORES EN EL ARRAY*/
-
-		else {                
-            
-            srand48(time(NULL));
-                
-            for(i=0; i<N; i++) {
-                *(muestra+i)=drand48() * (40.00-10.05) + 10.05;
-                j=(frente+n)%t_max;              
-                n++;
-                datos[j]=*(muestra+i);	
-            }
-        }
-    printf("\nEl array se ha llenado con éxito\n");
+    float entrada = 0;    
+    
+        j=(frente+n)%t_max;              
+        entrada = sumatorio/x;
+        datos[j]=entrada;
+        n++;
 }
 
 //FUNCION DE MANIPULACION DE DATOS 
@@ -283,12 +260,17 @@ void manipulacion(){
                 numero_muestras_array();
             }
             else if (buffer[1] == 'M') {
-                if (buffer[3] == '1'){
+                if (buffer[2] == '1'){
+                    
                     marcha();
-                    printf("\nArray: ");
-                    for(i=0;i<t_max;i++){
-                    printf("%.2f ",datos[i]);
+                    
+                    printf("\nDatos almacenados: ");
+                        
+                        for(i=0;i<t_max;i++){
+                        printf("%.2f ",datos[i]);
                     }
+                    
+                    printf("\n\n");
                 }
                 
                 else {
@@ -296,7 +278,7 @@ void manipulacion(){
                 }
             }
             else{ 
-                sprintf(missatge,"{%c 1}",buffer[1]);
+                sprintf(missatge,"{%c1}",buffer[1]);
             }
    }
             
@@ -341,14 +323,14 @@ int main(int argc, char *argv[]) {
 		memset( buffer, 0, 256 );
 		result = read(newFd, buffer, 256);
 		printf("Missatge rebut del client(bytes %d): %s\n",	result, buffer);
-        
+		
         manipulacion();
 		
         /*Enviar*/
 		strcpy(buffer,missatge); //Copiar missatge a buffer
 		result = write(newFd, buffer, strlen(buffer)+1); //+1 per enviar el 0 final de cadena
 		printf("Missatge enviat a client(bytes %d): %s\n",	result, missatge);
- 
+		
         /*Tancar el socket fill*/
 		result = close(newFd);
 	}

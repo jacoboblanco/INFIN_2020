@@ -5,38 +5,36 @@ char comanda;
 
 int posicion=0; //posición de lectura array entrada
 int PM=0; //PM=0 Paro, PM=1 Marcha
+int pm;
 int v; //parametro v array entrada
 float mostreo; //freq. de mostreo del sensor
 
 void setup() {
   Serial.begin(9600);
+}
 
 
-void loop() {    
+void loop() {
+  lectura_array();
 }
 
 
 void lectura_array() {
  
-  if(Serial.available()) { //Nos dice si hay datos dentro del buffer
-    memset(entrada, 0,sizeof(entrada)); //memset borra el contenido del array  "cadena" desde la posición 0 hasta el final sizeof
- 
-    while(Serial.available()>0) //Mientras haya datos en el buffer ejecuta la función
+    if(Serial.available()>0) //Comprobamos si en el buffer hay datos
     {
-      delay(5); //Poner un pequeño delay para mejorar la recepción de datos
-      entrada[posicion]=Serial.read();//Lee un carácter del string "cadena" de la "posicion", luego lee el siguiente carácter con "posicion++"
-      posicion++;
+    char entrada=Serial.read();  //Lee cada carácter uno por uno y se almacena en una variable
+ 	Serial.print(entrada);  //Imprimimos en la consola el carácter recibido
     }
-  }
 }
 
 void array_salida() {
- 	salida[0] = 'A';
-  	salida[1] = comanda;
+   salida[0] = 'A';
+    salida[1] = comanda;
 }
 
-void operacion() {
- 	
+/*void operacion() {
+  
   switch (entrada[1]) {
     case 'M':
       comanda = 'M';
@@ -72,7 +70,7 @@ void parada_marxa() {
       }
     else if (v=1) {
       PM = 1;
-      mostreo = 
+      //mostreo = 
       
       
       
@@ -83,3 +81,20 @@ void parada_marxa() {
     break;
   }
 }
+  
+  void sort_digital() {
+  }
+  
+  void ent_digital() {
+  }
+  
+  void ultima_m() {
+  }
+  
+  void parada_marxa() {
+  }
+  
+  void errorparametros() {
+  }
+  
+  */

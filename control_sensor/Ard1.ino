@@ -1,6 +1,5 @@
-
-char entrada[8]; //mensaje entrada
-char salida[8];  //mensaje salida
+char entrada[8]; //string entrada
+char salida[8];  //string salida
 
 // variables operacion() y lectura_array()
 int posicion=0;
@@ -72,13 +71,12 @@ void lectura_array() {
 
 
 void comandaE() {
-  decenas = entrada[2];
-  unidades = entrada[3];
-  Serial.println (decenas);
-  delay (2000);
+  decenas = entrada[2]-48;
+  unidades = entrada[3]-48;
+  delay (1000);
   pin = decenas*10 + unidades;
   Serial.println (pin);
-  
+  delay(1000);
   on_off = digitalRead(pin);
   Serial.print ("estat: ");
   Serial.println (on_off);
@@ -86,8 +84,8 @@ void comandaE() {
 
 
 void comandaS() {
-  decenas = entrada[2];
-  unidades = entrada[3];
+  decenas = entrada[2]-48;
+  unidades = entrada[3]-48;
   on_off = entrada[4];
   pin = decenas*10 + unidades;
   Serial.print (pin);

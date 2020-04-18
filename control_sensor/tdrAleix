@@ -1,0 +1,345 @@
+#include <Wire.h> //sensors
+#include "MPL3115A2.h"
+#include "HTU21D.h"
+
+MPL3115A2 myPressure; //Lectura de pressió
+HTU21D myHumidity; //Lectura humitat
+
+
+const byte WSPEED = 3;
+const byte RAIN = 2;
+const byte STAT1 = 7;
+const byte STAT2 = 8;
+
+const byte REFERENCE_3V3 = A3;
+const byte LIGHT = A1;
+const byte BATT = A2;
+const byte WDIR = A0;
+
+long lastSecond; //The millis counter to see when a second rolls by
+byte seconds; //When it hits 60, increase the current minute
+byte seconds_2m; //Keeps track of the "wind speed/dir avg" over last 2 minutes array of data
+byte minutes; //Keeps track of where we are in various arrays of data
+byte minutes_10m; //Keeps track of where we are in wind gust/dir over last 10 minutes array of data
+
+long lastWindCheck = 0;
+volatile long lastWindIRQ = 0;
+volatile byte windClicks = 0;
+
+
+byte windspdavg[120];
+int winddiravg[120];
+float windgust_10m[10];
+int windgustdirection_10m[10];
+volatile float rainHour[60];
+
+
+int winddir = 0; //de 0 a 360º -- instantani
+float windspeedmph = 0; //mph velocitat instantània
+float windgustmph = 0; // [mph current wind gust, using software specific time period]
+int windgustdir = 0; // [0-360 using software specific time period]
+float windspdmph_avg2m = 0; // [mph 2 minute average wind speed mph]
+int winddir_avg2m = 0; // [0-360 2 minute average wind direction]
+float windgustmph_10m = 0; // [mph past 10 minutes wind gust mph ]
+int windgustdir_10m = 0; // [0-360 past 10 minutes wind gust direction]
+float humidity = 0; // [%]
+float tempf = 0; // [temperature ºC]
+float rainin = 0; // [inches en els ultims 60min]
+volatile float dailyrainin = 0; // [inches durant el dia]
+//float baromin = 30.03;// [barom in] - It's hard to calculate baromin locally, do this in the agent
+float pressure = 0;
+//float dewptf; // [dewpoint F] - It's hard to calculate dewpoint locally, do this in the agent
+
+float batt_lvl = 11.8; //Analògic de 0 a 1024
+float light_lvl = 455; //Analògic de 0 a 1024
+
+volatile unsigned long raintime, rainlast, raininterval, rain;
+
+
+void rainIRQ() //Càlcul de pluja
+
+{
+  raintime = millis();
+  raininterval = raintime - rainlast;
+
+    if (raininterval > 10) //Ignorem les lectures dels 10 últims mS
+  {
+    dailyrainin += 0.011; //cada pendul és 0.011" d'aigua
+    rainHour[minutes] += 0.011;
+
+    rainlast = raintime;
+  }
+}
+
+void wspeedIRQ()
+//l'anamòmetre fa dos senyals per volta
+{
+  if (millis() - lastWindIRQ > 10) // Ignore switch-bounce glitches less than 10ms (142MPH max reading) after the reed switch closes
+  {
+    lastWindIRQ = millis();
+    windClicks++; //Cada "click" es correspon a 1,492MPH
+  }
+}
+
+
+void setup()
+{
+  Serial.begin(9600);
+  //Serial.println("Weather Shield Example");
+
+  pinMode(STAT1, OUTPUT);
+  pinMode(STAT2, OUTPUT);
+  
+  pinMode(WSPEED, INPUT_PULLUP);
+  pinMode(RAIN, INPUT_PULLUP);
+  
+  pinMode(REFERENCE_3V3, INPUT);
+  pinMode(LIGHT, INPUT);
+
+  attachInterrupt(0, rainIRQ, FALLING);
+  attachInterrupt(1, wspeedIRQ, FALLING);
+
+  // configuració de sensors
+  myPressure.begin();
+  myPressure.setModeBarometer();
+  myPressure.setOversampleRate(7);
+  myPressure.enableEventFlags();
+
+  myHumidity.begin();
+
+  seconds = 0;
+  lastSecond = millis();
+
+  interrupts();
+
+  //Serial.println("Weather a Punt!");
+
+}
+
+void loop()
+{
+  if(millis() - lastSecond >= 1000)
+  {
+    digitalWrite(STAT1, HIGH); //led
+    
+    lastSecond += 1000;
+
+    if(++seconds_2m > 119) seconds_2m = 0;
+
+    float currentSpeed = windspeedmph;
+    int currentDirection = get_wind_direction();
+    windspdavg[seconds_2m] = (int)currentSpeed;
+    winddiravg[seconds_2m] = currentDirection;
+
+    if(currentSpeed > windgust_10m[minutes_10m])
+    {
+      windgust_10m[minutes_10m] = currentSpeed;
+      windgustdirection_10m[minutes_10m] = currentDirection;
+    }
+
+    if(currentSpeed > windgustmph)
+    {
+      windgustmph = currentSpeed;
+      windgustdir = currentDirection;
+    }
+
+    if(++seconds > 59)
+    {
+      seconds = 0;
+
+      if(++minutes > 59) minutes = 0;
+      if(++minutes_10m > 9) minutes_10m = 0;
+
+      rainHour[minutes] = 0;
+      windgust_10m[minutes_10m] = 0;
+    }
+
+    printWeather();
+
+    digitalWrite(STAT1, LOW); //Turn off stat LED
+  }
+
+  delay(100);
+}
+
+void calcWeather()
+{
+  //Direcció vent
+  winddir = get_wind_direction();
+
+  //Intensitat vent
+  windspeedmph = get_wind_speed();
+  
+  windgustmph = 0;
+  windgustdir = 0;
+
+  float temp = 0;
+  for(int i = 0 ; i < 120 ; i++)
+    temp += windspdavg[i];
+  temp /= 120.0;
+  windspdmph_avg2m = temp;
+
+  temp = 0;
+  for(int i = 0 ; i < 120 ; i++)
+    temp += winddiravg[i];
+  temp /= 120;
+  winddir_avg2m = temp;
+
+  windgustmph_10m = 0;
+  windgustdir_10m = 0;
+  //Step through the 10 minutes  
+  for(int i = 0; i < 10 ; i++)
+  {
+    if(windgust_10m[i] > windgustmph_10m)
+    {
+      windgustmph_10m = windgust_10m[i];
+      windgustdir_10m = windgustdirection_10m[i];
+    }
+  }
+
+  //Humitat
+  humidity = myHumidity.readHumidity();
+  //float temp_h = myHumidity.readTemperature();
+  //Serial.print(" TempH:");
+  //Serial.print(temp_h, 2);
+
+
+
+  tempf = myPressure.readTemp(); // Celsius
+  //Serial.print(" TempP:");
+  //Serial.print(tempf, 2);
+
+  //Total rainfall for the day is calculated within the interrupt
+  //Calculate amount of rainfall for the last 60 minutes
+  rainin = 0;  
+  for(int i = 0 ; i < 60 ; i++)
+    rainin += rainHour[i];
+
+  //Pressió
+  pressure = myPressure.readPressure();
+
+
+  //Llum
+  light_lvl = get_light_level();
+
+  //Bateria
+  batt_lvl = get_battery_level();
+}
+
+float get_light_level()
+{
+  float operatingVoltage = analogRead(REFERENCE_3V3);
+
+  float lightSensor = analogRead(LIGHT);
+  
+  operatingVoltage = 3.3 / operatingVoltage;
+  
+  lightSensor = operatingVoltage * lightSensor;
+  
+  return(lightSensor);
+}
+
+
+float get_battery_level()
+{
+  float operatingVoltage = analogRead(REFERENCE_3V3);
+
+  float rawVoltage = analogRead(BATT);
+  
+  operatingVoltage = 3.30 / operatingVoltage;
+  
+  rawVoltage = operatingVoltage * rawVoltage;
+  
+  rawVoltage *= 4.90;
+  
+  return(rawVoltage);
+}
+
+float get_wind_speed()
+{
+  float deltaTime = millis() - lastWindCheck;
+
+  deltaTime /= 1000.0;
+
+  float windSpeed = (float)windClicks / deltaTime; //3 / 0.750s = 4
+
+  windClicks = 0;
+  lastWindCheck = millis();
+
+  windSpeed *= 1.492; //4 * 1.492 = 5.968MPH
+
+  /* Serial.println();
+   Serial.print("Windspeed:");
+   Serial.println(windSpeed);*/
+
+  return(windSpeed);
+}
+
+int get_wind_direction() 
+{
+  unsigned int adc;
+
+  adc = analogRead(WDIR); // get the current reading from the sensor
+
+ //Lectures de direcció i taula converssió.
+
+  if (adc < 380) return (113);
+  if (adc < 393) return (68);
+  if (adc < 414) return (90);
+  if (adc < 456) return (158);
+  if (adc < 508) return (135);
+  if (adc < 551) return (203);
+  if (adc < 615) return (180);
+  if (adc < 680) return (23);
+  if (adc < 746) return (45);
+  if (adc < 801) return (248);
+  if (adc < 833) return (225);
+  if (adc < 878) return (338);
+  if (adc < 913) return (0);
+  if (adc < 940) return (293);
+  if (adc < 967) return (315);
+  if (adc < 990) return (270);
+  return (-1); // error, disconnected?
+}
+
+
+
+void printWeather()
+{
+  calcWeather();
+
+  Serial.println();
+  Serial.print("$,dirViento=");
+  Serial.print(winddir);
+  Serial.print(",velViento=");
+    Serial.print(windspeedmph*1,60934);
+//  Serial.print(",windgustmph=");
+//  Serial.print(windgustmph, 1);
+//  Serial.print(",windgustdir=");
+//  Serial.print(windgustdir);
+//  Serial.print(",windspdmph_avg2m=");
+//  Serial.print(windspdmph_avg2m, 1);
+//  Serial.print(",winddir_avg2m=");
+//  Serial.print(winddir_avg2m);
+    Serial.print(",windgustmph_10m=");
+    Serial.print(windgustmph_10m, 1);
+//  Serial.print(",windgustdir_10m=");
+//  Serial.print(windgustdir_10m);
+  Serial.print(",humedad=");
+  Serial.print(humidity, 1);
+  Serial.print(",temp=");
+  Serial.print(tempf, 1);
+  Serial.print(",lluvia=");
+  Serial.print(rainin, 2);
+  Serial.print(",lluviaDia=");
+  Serial.print(dailyrainin, 2);
+  Serial.print(",pression=");
+  Serial.print(pressure, 2);
+  Serial.print(",bat=");
+  Serial.print(batt_lvl, 2);
+  Serial.print(",luz=");
+  Serial.print(light_lvl, 2);
+  Serial.print(",");
+  Serial.println("#");
+
+}

@@ -141,7 +141,7 @@ void comandaS() {
 
     decenas = comanda[2]-48;
     unidades = comanda[3]-48;
-    valorPin = comanda[4];
+    valorPin = comanda[4]-48;
     pin = decenas*10 + unidades;
   
     delay(100);

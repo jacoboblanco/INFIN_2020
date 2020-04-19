@@ -66,6 +66,7 @@ void lectura_array() {
   Serial.println(entrada);  //Imprimimos en la consola el carácter recibido
   comanda=entrada[1];
   Serial.println(comanda);
+  posicion=0;
   }
 }
 

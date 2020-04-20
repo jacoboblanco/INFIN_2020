@@ -1,5 +1,5 @@
 char entrada[8]; //String d'entrada.
-int posicion=0;  //Posició del string.
+int posicion;    //Posició del string.
 int pin;         //Variable utilizada en les operacions 'E' i 'S'.
 
 void setup(){

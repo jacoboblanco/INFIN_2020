@@ -37,10 +37,6 @@ void comandas() {
     	case 'S':
     		comandaS();
 		break;
-
-		default:
-			
-		break;
   }
 }
 
@@ -61,7 +57,13 @@ void comandaE() {
   
    else if ((entrada[1])=='A' || (entrada[2])=='A' || (entrada[3])=='A') // ERROR_protocol: es rep una segona 'A' abans 'Z' 
         Serial.println (" ");      // es descarten bytes rebuts i no es respon res.
- 
+
+   else if (pin<0 || pin>13) {      // ERROR_parametres:sempre que el número d'entrada digital nn no sigui correcte.
+   		Serial.print("AE2");        // Missatge ERROR 3 per la operació 'E'.
+        Serial.print(ValorEntrada);
+        Serial.print("Z\n");
+   }
+  
    else {          
 		Serial.print("AE0");         // Missatge de OK. 
 		Serial.print(ValorEntrada);
@@ -80,6 +82,9 @@ void comandaS() {
    else if ((entrada[1])=='A' || (entrada[2])=='A' || (entrada[3])=='A' || (entrada[4])=='A') // ERROR_protocol: es rep una segona 'A' abans 'Z' 
         Serial.println (" ");      // es descarten bytes rebuts i no es respon res.
   
+   else if (pin<0 || pin>13 || ValorSortida<0 || ValorSortida>1) //ERROR_parametres:empre que el número de sortida digital nn no sigui correcte. Sempre que el valor v no sigui correcte.
+     	Serial.print("AS2Z\n");        // Missatge ERROR 2 per la operació 'S'.;
+     
    else {
      	ValorSortida = (entrada[4]-48);
   		pin = (entrada[2]-48)*10+(entrada[3]-48);           

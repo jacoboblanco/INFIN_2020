@@ -7,23 +7,26 @@ void setup(){
 }
 
 void loop(){
- lectura_array(); 
- operaciones();
+  if (lectura_array()==1) {
+    comandas();
+  }
  delay(2000);
 }
 
-void lectura_array() {
-
-  if(Serial.available()) { //Nos dice si hay datos dentro del buffer
-    while (Serial.available()>0) { //Comprobamos si en el buffer hay datos
-       entrada[posicion]=Serial.read();  //Lee cada carácter uno por uno y se almacena en una variable
-       posicion++;
+int lectura_array() { 
+  int r=0;
+  
+  if(Serial.available()>0) { 
+    r=1;
+    for (posicion=0; posicion<=8; posicion++)  {
+    	entrada[posicion]=Serial.read();  
     }
   posicion=0;
-}
+  }
+  return r; 
 }
 
-void operaciones() {
+void comandas() {
 
   switch (entrada[1]){
     
@@ -36,7 +39,7 @@ void operaciones() {
 		break;
 
 		default:
-			Serial.println (" ");
+			
 		break;
   }
 }

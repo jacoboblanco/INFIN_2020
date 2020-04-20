@@ -1,0 +1,52 @@
+
+void loop(){
+
+    if(lectura_array()>=1) {
+  
+        /*FUNCIONES A EJECUTAR*/;
+    }
+}
+/* DIVERSAS MANERAS PARA ENTRAR DATOS SIN QUE DE ERRORES NI NECESIDAD DEL DELAY
+
+int lectura_array2() { 
+
+  int r=0;
+  
+        if(Serial.available()>0) { 
+             
+             r=1;
+
+                for (t=0; t<=8; t++)  {
+              entrada_consola[t]=Serial.read();  
+                }
+        t=0;
+        }
+
+  return r; 
+}
+
+
+int lectura_array3() { 
+
+  int r=0;
+  
+                for (t=0; t<=8; )  {
+                    
+                    if(Serial.available()>0) { 
+                        
+                        entrada_consola[t]=Serial.read();  
+                        
+                        if(entrada_consola[t]=='\n'){
+                            r=1;
+                            break;
+                         }
+
+                        t++;
+                    }
+                    
+                }
+        t=0;
+  return r; 
+
+}
+*/

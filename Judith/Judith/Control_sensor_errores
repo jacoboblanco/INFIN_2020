@@ -14,12 +14,10 @@ void loop(){
 
 void lectura_array() {
 
-  if(Serial.available()) //Nos dice si hay datos dentro del buffer
-  {
-    while (Serial.available()>0) //Comprobamos si en el buffer hay datos
-    {
-    entrada[posicion]=Serial.read();  //Lee cada carácter uno por uno y se almacena en una variable
-    posicion++;
+  if(Serial.available()) { //Nos dice si hay datos dentro del buffer
+    while (Serial.available()>0) { //Comprobamos si en el buffer hay datos
+       entrada[posicion]=Serial.read();  //Lee cada carácter uno por uno y se almacena en una variable
+       posicion++;
     }
   posicion=0;
 }

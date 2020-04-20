@@ -30,19 +30,15 @@ void operaciones() {
   switch (entrada[1]){
     
     	case 'E':
-			Serial.println ("S'executa la comanda E");
     		comandaE();
-    		Serial.println ("Finalitzat\n");
 		break;
     
     	case 'S':
-			Serial.println ("S'executa la comanda S");
     		comandaS();
-    		Serial.println ("Finalitzat\n");
 		break;
 
 		default:
-			Serial.println ("Error");
+			Serial.println (" ");
 		break;
   }
 }

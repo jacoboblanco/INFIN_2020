@@ -1,61 +1,19 @@
-char entrada[8]; //string entrada
-char salida[8];  //string salida
-
-// variables operacion() y lectura_array()
-int posicion=0;
-char comanda;
-
-// variables comandaE() y comandaS()
-int decenas;
-int unidades;
-int pin;
-int on_off;
+char entrada[8]; //String d'entrada.
+int posicion=0;  //Posició del string.
+int pin;         //Variable utilizada en les operacions 'E' i 'S'.
 
 void setup(){
   Serial.begin(9600);
 }
 
 void loop(){
-  lectura_array();
-  delay(500);
-  operacion();
-  delay(2000);
+ lectura_array(); 
+ comandas();
+ delay(2000);
 }
-
-void operacion() {
-  
-  Serial.println ("Seleccion de operacion");
-  
-  switch (comanda){
-		/*case 'M':
-			Serial.println ("S'executa la comanda M");
-		break;*/
-    
-    	case 'S':
-			Serial.println ("S'executa la comanda S");
-        	error_protocolo();
-    		Serial.println ("Finalitzat");
-		break;
-    
-    	case 'E':
-			Serial.println ("S'executa la comanda E");
-    		error_protocolo();
-    		Serial.println ("Finalitzat");
-		break;
-    
-    	/*case 'C':
-			Serial.println ("S'executa la comanda C");
-		break;*/
-
-		default:
-			Serial.println ("Error");
-		break;
-  }
-}
-
 
 void lectura_array() {
- 
+
   if(Serial.available()) //Nos dice si hay datos dentro del buffer
   {
     while (Serial.available()>0) //Comprobamos si en el buffer hay datos
@@ -63,95 +21,72 @@ void lectura_array() {
     entrada[posicion]=Serial.read();  //Lee cada carácter uno por uno y se almacena en una variable
     posicion++;
     }
-  Serial.println(entrada);  //Imprimimos en la consola el carácter recibido
-  comanda=entrada[1];
-  Serial.println(comanda);
+  posicion=0;
+}
+}
+
+void comandas() {
+
+  switch (entrada[1]){
+    
+    	case 'E':
+			Serial.println ("S'executa la comanda E");
+    		comandaE();
+    		Serial.println ("Finalitzat\n");
+		break;
+    
+    	case 'S':
+			Serial.println ("S'executa la comanda S");
+    		comandaS();
+    		Serial.println ("Finalitzat\n");
+		break;
+
+		default:
+			Serial.println ("Error");
+		break;
   }
 }
 
 void comandaE() {  
-   decenas = entrada[2]-48;
-   unidades = entrada[3]-48;
-   delay (1000);
-   pin = decenas*10 + unidades;
-   Serial.println (pin);
-   delay(1000);
-   on_off = digitalRead(pin);
-   Serial.print ("estat: ");
-   Serial.println (on_off);
-}
-
-void comandaS() {  
-  decenas = entrada[2]-48;
-  unidades = entrada[3]-48;
-  on_off = entrada[4];
-  pin = decenas*10 + unidades;
-  Serial.print (pin);
-  Serial.print ("   -   ");
-  Serial.println (on_off);
+  int i;
+  int pin;
+  bool ValorEntrada;	
   
-  delay(100);
+  pin = (entrada[2]-48)*10+(entrada[3]-48);           
+  pinMode(pin, INPUT);                   
+  ValorEntrada=digitalRead(pin); 
   
-  switch (on_off) {
-    case 1:
-    digitalWrite (pin, 1);
-  	Serial.print ("Pin");
-    Serial.print (pin);
-    Serial.println ("ON");
-    break;
+   if (entrada[4]!='Z') {           // ERROR_protocol: la 'Z' no està en la posició correcta.
+       	Serial.print("AE1");        // Missatge ERROR 1 per la operació 'E'.
+        Serial.print(ValorEntrada);
+        Serial.print("Z\n");
+   }
   
-    case 0: 
-    digitalWrite (pin, 0);
-  	Serial.print ("Pin");
-    Serial.print (pin);
-    Serial.println ("OFF");
-	break;
-  
-    default:
-  	Serial.println ("ERROR");
-    break;
-  } 
-}
-
-void error_protocolo(){
- int i=0;
+   else if ((entrada[1])=='A' || (entrada[2])=='A' || (entrada[3])=='A') // ERROR_protocol: es rep una segona 'A' abans 'Z' 
+        Serial.println (" ");      // es descarten bytes rebuts i no es respon res.
  
- switch (comanda) {
-   case 'E':
-     if (entrada[4]!='Z') {           //ERROR_protocol: la 'Z' no està en la posició correcta.
-       Serial.println ("AE10Z\n");    //resposta ERROR_protocol operació 'E'.
-     }
-     else if (entrada[i]){            //ERROR_protocol: es rep una segona 'A' abans 'Z' 
-       for (i=1; i<4; i++){
-         if (entrada[i]=='A'){
-    	    Serial.println (":)");      //es descarten bytes rebuts i no es respon res. 
-         }  
-         else {}
-       }
-     }
-     else {    
-       comandaE();
-     }
-   break;
-    
-   case 'S':
-     if (entrada[5]!='Z') {           //ERROR_protocol: la 'Z' no està en la posició correcta.
-       Serial.println ("AS1Z\n");     //resposta ERROR_protocol operació 'S'.
-     }
-     else if (entrada[i]){            //ERROR_protocol: es rep una segona 'A' abans 'Z' 
-       for (i=1; i<5; i++){
-         if (entrada[i]=='A'){
-    	  Serial.println (":)");      //es descarten bytes rebuts i no es respon res. 
-         }  
-         else {}
-       }
-     }
-     else {  
-       comandaS();
-     }
-    break;
-    
-    default:
-      Serial.println ("");
- }     
+   else {          
+		Serial.print("AE0");         // Missatge de OK. 
+		Serial.print(ValorEntrada);
+		Serial.print("Z\n");
+   }
 }
+
+void comandaS() {
+  int pin;
+  bool ValorSortida;
+  
+   if (entrada[5]!='Z') {           // ERROR_protocol: la 'Z' no està en la posició correcta.
+       	Serial.print("AS1Z\n");        // Missatge ERROR 1 per la operació 'S'.;
+   }
+  
+   else if ((entrada[1])=='A' || (entrada[2])=='A' || (entrada[3])=='A' || (entrada[4])=='A') // ERROR_protocol: es rep una segona 'A' abans 'Z' 
+        Serial.println (" ");      // es descarten bytes rebuts i no es respon res.
+  
+   else {
+     	ValorSortida = (entrada[4]-48);
+  		pin = (entrada[2]-48)*10+(entrada[3]-48);           
+  		Serial.print("AS0Z\n");         // Missatge de OK.
+   }
+}
+

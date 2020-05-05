@@ -1,0 +1,28 @@
+
+
+/************************************************  FITA 3  **********************************************************/
+
+#include <stdio.h>
+
+void centigrados ();
+float lectura;
+float grados;
+const int FS=70;
+
+int  main (){
+	
+
+	centigrados ();
+	
+	
+return 0;
+
+}
+
+void centigrados (){
+	printf("Introduzca un valor entre 0 y 1023\n");
+	scanf("%f",&lectura);
+	grados=lectura*FS/1023;
+	printf("%f", grados);
+		
+}

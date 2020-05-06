@@ -1,3 +1,7 @@
+// gcc fita_3_desarrollo.c -o fita3
+// ./fita3
+
+
 //      linux_serie_demo.c
 //
 //This document is copyrighted (c) 1997 Peter Baumann, (c) 2001 Gary Frerking

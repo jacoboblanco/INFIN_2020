@@ -1,0 +1,418 @@
+
+/************************************************  FITA 3  **********************************************************/
+
+
+
+
+
+
+
+//librerias para serie(HABRAN ALGUNAS REPETIDAS)***************
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <fcntl.h>                                                        
+#include <termios.h>       
+#include <sys/ioctl.h>    
+ 
+#define BAUDRATE B9600                                                
+//#define MODEMDEVICE "/dev/ttyS0"        //Conexió IGEP - Arduino
+#define MODEMDEVICE "/dev/ttyACM0"         //Conexió directa PC(Linux) - Arduino                                   
+#define _POSIX_SOURCE 1 /* POSIX compliant source */                       
+                                                           
+struct termios oldtio,newtio;     
+//*************************************************************
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <string.h>
+#include <time.h>
+
+#define SERVER_PORT_NUM		5001
+#define SERVER_MAX_CONNECTIONS	4
+
+#define REQUEST_MSG_SIZE	1024
+
+#define t_max 100
+
+
+//VARIABLES GLOBALES
+
+char	buffer[256];
+char	missatge[200];
+struct sockaddr_in	serverAddr;
+struct sockaddr_in	clientAddr;
+unsigned int	sockAddrSize;
+int			sFd;
+int			newFd;
+int 		result;
+
+int i;
+int j=0;
+
+int unsigned frente=0;
+int unsigned n=0;
+float *muestra;
+float datos[t_max];
+float menor;
+float mayor;
+
+//nuevas
+char buf[100];
+int t=0;
+int fd;
+int w=0; 
+float temp;    
+//PROTOTIPOS DE FUNCIONES
+
+void manipulacion();
+void muestra_antigua();
+void muestra_maxima();
+void muestra_minima();
+void reset_max_min();
+void numero_muestras_array();
+void paro();
+void marcha();
+void Enviar();
+void Rebre(int fd,char *buf);
+void adquirir_muestra(int N);
+void cola_circular(float sumatorio, int x);
+void centigrados ();  
+void adquisicion ();  
+void LED ();
+void convertidor();
+void adquirir_muestra (int N);
+
+
+int  main (){
+
+	fd = ConfigurarSerie();
+	adquisicion ();   
+	Enviar(fd,missatge);
+	sleep(1);
+	Rebre(fd,buf);
+	
+	while(1){
+		LED ();
+		convertidor();
+		adquirir_muestra (int N);
+		
+		
+	}
+	
+	
+return 0;
+
+}                       
+
+//FUNCION MUESTRA ANTIGUA
+
+void muestra_antigua(){    
+
+        float ultimo;
+       
+        if(j < 0){
+         //  sprintf(missatge, "{U2}");
+        
+        }
+        else{
+        ultimo=datos[j];
+        //sprintf(missatge, "{U0%.2f}",ultimo);
+        printf(" el ultimo %f", ultimo);
+        frente=(frente+1)%t_max;
+        n--;
+        j--;
+        }
+   }
+
+//FUNCION RESET MAXIMO Y MINIMO
+
+void reset_max_min(){
+        
+            mayor=0; 
+            menor=0;
+            
+           // sprintf(missatge,"{R0}");
+           printf(" El mayor %f y el menor %f", mayor,menor);
+        }
+
+//FUNCION NUMERO MUESTRAS
+
+
+void numero_muestras_array(){
+        
+        if(n<t_max){
+          // sprintf(missatge, "{B0%d}",n);
+          printf("El maximo es %d",n);
+        }
+            
+        else{
+           //sprintf(missatge, "{B0%d}",t_max);
+            printf("El minimo es %d",t_max);
+        }
+ }
+
+
+//FUNCION MUESTRA MAXIMA
+
+void muestra_maxima(){
+
+      if(n<0){
+
+            //sprintf(missatge, "{X2}");
+        
+        }
+ 
+      else{
+        
+            //sprintf(missatge, "{X0%.2f}",mayor);  
+             printf("%f",mayor);      
+        }
+}
+    
+//FUNCION MUESTRA MINIMA
+
+void muestra_minima(){
+        
+        if(n<0){
+            //sprintf(missatge, "{Y2}");
+            }
+       
+        else{ 
+          
+        }
+        //sprintf(missatge, "{Y0%.2f}",menor);
+        printf("%f",menor);
+    }
+ 
+//FUNCION PARO
+
+void paro(){
+        
+        //sprintf(missatge,"{M0}");
+ }
+
+//FUNCION MARCHA
+
+void marcha(){    
+                   
+        adquirir_muestra(buffer[4]);        
+
+       // sprintf(missatge,"{M0}");
+    
+    /*LLENAR REGISTRO DE MAYOR */  
+        mayor = datos[0];
+        
+     for (int i=0;i<n;i++){
+                if (datos[i]>mayor){
+                mayor=datos[i];
+                }
+            }   
+    
+    /*LLENAR REGISTRO DE MENOR */
+            menor = datos[0];
+            
+        for (int i=0;i<n;i++){
+                if (datos[i]<menor){
+                menor=datos[i];
+                }
+            }     
+        }
+
+//FUNCION PARA ADQUIRIR MUESTRAS EN EL ARRAY
+
+
+//FUNCION DE GUARDAR MUESTRAS EN EL ARRAY
+        
+void cola_circular (float sumatorio, int x) {
+    
+    float entrada = 0;    
+    
+        j=(frente+n)%t_max;              
+        entrada = sumatorio/x;
+        datos[j]=entrada;
+        n++;
+}
+
+
+void centigrados (){   //SE TIENEN QUE CAMBIAR LAS VARIABLES PARA LA LECTURA
+	
+	float lectura;
+	float voltios;
+
+	printf("Introduzca un valor entre 0 y 1023\n");
+	scanf("%f",&lectura);
+	voltios=lectura*5/1023;
+	printf("%f", voltios);
+		
+}
+int	ConfigurarSerie(void)
+{
+	int fd;
+	fd = open(MODEMDEVICE, O_RDWR | O_NOCTTY );
+	if (fd <0) {perror(MODEMDEVICE); exit(-1); }
+
+	tcgetattr(fd,&oldtio); /* save current port settings */
+
+	bzero(&newtio, sizeof(newtio));
+	//newtio.c_cflag = BAUDRATE | CRTSCTS | CS8 | CLOCAL | CREAD;
+	newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
+	newtio.c_iflag = IGNPAR;
+	newtio.c_oflag = 0;
+
+	/* set input mode (non-canonical, no echo,...) */
+	newtio.c_lflag = 0;
+
+	newtio.c_cc[VTIME]    = 0;   /* inter-character timer unused */
+	newtio.c_cc[VMIN]     = 1;   /* blocking read until 1 chars received */
+
+	tcflush(fd, TCIFLUSH);
+	tcsetattr(fd,TCSANOW,&newtio);
+
+	sleep(2); //Per donar temps a que l'Arduino es recuperi del RESET
+	return fd;
+}
+
+void TancarSerie(int fd)
+{
+	tcsetattr(fd,TCSANOW,&oldtio);
+	close(fd);
+}
+
+void Enviar(int fd,char *missatge)
+{
+	int res=0;
+	
+	res = write(fd,missatge,strlen(missatge));
+	
+	if (res <0) {tcsetattr(fd,TCSANOW,&oldtio); perror(MODEMDEVICE); exit(-1); }
+	
+	printf("Enviats %d bytes: %s\n",res,missatge);	//***********************************************************************************************************
+}
+void Rebre(int fd,char *buf)
+{
+	int k = 0;
+	int res = 0;
+	int bytes = 0;
+	
+	ioctl(fd, FIONREAD, &bytes);
+
+	do
+	{
+		res = res + read(fd,buf+k,1);
+		k++;
+	}
+	while (buf[k-1] != 'Z');	//PARA CUANDO LEA EL FINAL DEL PROTOCOLO
+	//hay que crear una variable donde esten todo los RES concatenados
+	printf("Rebuts %d bytes: %s\n",res,buf);	//***********************************************************************************************************
+}
+void adquisicion (){
+	
+	
+	int v=10;
+	int mostres=10;
+	int t=25;                                            //(valores fuera de rango para entrar en while)
+	
+	char missatge[100];
+	printf("Espera a que el sistema inicie\n");
+	
+
+	memset(missatge,'\0',t_max);  //memsetstring donde vas a substituir, caracter que vas a substituir, numero de veces desde posicion 0) (basicamente las pone a 0)
+	memset(buf,'\0', t_max);
+												// Enviar el missatge 1
+	while (v !=0 || v !=1) 						//protección valores erroneos
+	{
+		printf("Posar en marxa [1] o parar [0]:");
+		scanf("%i", &v);
+		while (v != 1 && v!=0) 					//protección valores erroneos
+		{
+			printf("Posar en marxa [1] o parar [0]:");
+			scanf("%i", &v);
+		}
+		if (v==1){ 								//si se pone en marcha realizamos acciones
+			printf("Es posa en marxa l'adquisicio.\n");
+			while (t <01 || t>20) 				//protección valores erroneos
+			{
+				printf("Temps de mostreig desitjat(1-20):");
+				scanf("%i", &t); 				//guardamos el tiempo en una variable de tipo entero
+			}
+			while (mostres <01 || mostres>9) 	//protección valores erroneos
+			{
+				printf("Numero de mostres per fer la mitjana(1-9):");
+				scanf("%i", &mostres);
+			}
+			sprintf(missatge,"AM%i%.2iZ",v,t);	//cargem a la variable a enviar les dades
+			break;
+		}
+		else if (v==0)							//si se presiona finalizar volvemos a preguntar
+		{ 
+			printf("Adquisicio aturada.\n");
+			sprintf(missatge,"AM000Z");			//cargem a la variable a enviar les dades
+		}
+	}
+}
+	
+void LED (){
+	
+	if (w==0){w=1;}else{w=0;}
+		sprintf(missatge,"AS13%iZ",w); 
+		Enviar(fd,missatge);
+		sleep(1);
+		Rebre(fd,buf);
+		
+	}
+	
+void convertidor(){
+	    char lecturatemp[7];
+	    
+		
+		sprintf(missatge,"ACZ");
+		Enviar(fd,missatge);
+		sleep(t);    //se queda leiendo el tiempo t previamente introducido
+		Rebre(fd,buf);
+		sprintf(lecturatemp,"%c%c%c%c%c",buf[3],buf[4],buf[5],buf[6],buf[7]);
+		temp=atof(lecturatemp);  //convierte a float
+}
+void adquirir_muestra (int N) {
+		
+    float suma=0;
+    
+    muestra = (float*)malloc(N*sizeof(float*));
+    
+		if (muestra == NULL) {
+			printf("Error array. No se ha podido reservar memoria.\n");
+		}
+        
+        /*CREA LOS VALORES EN EL ARRAY*/
+		
+        else {                
+            
+
+            for(i=0; i<N; i++) {
+                *(muestra+i)=temp;
+               // printf("%.2f ;",*(muestra+i));
+                suma = suma + *(muestra+i);
+            }
+               // printf("\n%2.f",suma);
+                cola_circular (suma,N);
+	}
+}

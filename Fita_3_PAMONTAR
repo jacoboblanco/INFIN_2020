@@ -114,8 +114,8 @@ int  main (){
 	while(1){
 		LED ();
 		convertidor();
-		adquirir_muestra (int N);
-		
+//falta conversión de temperatura
+		marcha();
 		
 	}
 	
@@ -215,7 +215,7 @@ void paro(){
 
 void marcha(){    
                    
-        adquirir_muestra(buffer[4]);        
+        adquirir_muestra(nmediana);        
 
        // sprintf(missatge,"{M0}");
     
@@ -239,7 +239,30 @@ void marcha(){
         }
 
 //FUNCION PARA ADQUIRIR MUESTRAS EN EL ARRAY
+void adquirir_muestra (int N) {
+		
+    float suma=0;
+    
+    muestra = (float*)malloc(N*sizeof(float*));
+    
+		if (muestra == NULL) {
+			printf("Error array. No se ha podido reservar memoria.\n");
+		}
+        
+        /*CREA LOS VALORES EN EL ARRAY*/
+		
+        else {                
+            
 
+            for(i=0; i<N; i++) {
+                *(muestra+i)=temperatura;
+               // printf("%.2f ;",*(muestra+i));
+                suma = suma + *(muestra+i);
+            }
+               // printf("\n%2.f",suma);
+                cola_circular (suma,N);
+	}
+}
 
 //FUNCION DE GUARDAR MUESTRAS EN EL ARRAY
         
@@ -253,16 +276,15 @@ void cola_circular (float sumatorio, int x) {
         n++;
 }
 
-
 void centigrados (){   //SE TIENEN QUE CAMBIAR LAS VARIABLES PARA LA LECTURA
 	
-	float lectura;
-	float voltios;
+
+	float temperatura;
 
 	printf("Introduzca un valor entre 0 y 1023\n");
-	scanf("%f",&lectura);
-	voltios=lectura*5/1023;
-	printf("%f", voltios);
+
+	temperatura=temp*5/1023;
+	printf("%f",temperatura);
 		
 }
 int	ConfigurarSerie(void)
@@ -328,47 +350,34 @@ void Rebre(int fd,char *buf)
 void adquisicion (){
 	
 	
-	int v=10;
-	int mostres=10;
-	int t=25;                                            //(valores fuera de rango para entrar en while)
-	
 	char missatge[100];
 	printf("Espera a que el sistema inicie\n");
 	
 
-	memset(missatge,'\0',t_max);  //memsetstring donde vas a substituir, caracter que vas a substituir, numero de veces desde posicion 0) (basicamente las pone a 0)
-	memset(buf,'\0', t_max);
-												// Enviar el missatge 1
-	while (v !=0 || v !=1) 						//protección valores erroneos
-	{
-		printf("Posar en marxa [1] o parar [0]:");
-		scanf("%i", &v);
-		while (v != 1 && v!=0) 					//protección valores erroneos
-		{
-			printf("Posar en marxa [1] o parar [0]:");
-			scanf("%i", &v);
-		}
-		if (v==1){ 								//si se pone en marcha realizamos acciones
-			printf("Es posa en marxa l'adquisicio.\n");
-			while (t <01 || t>20) 				//protección valores erroneos
-			{
-				printf("Temps de mostreig desitjat(1-20):");
-				scanf("%i", &t); 				//guardamos el tiempo en una variable de tipo entero
+	
+int v;
+	int t1;
+	int nmediana;
+
+	printf("\nSeleccione el modo que desea: 1 (marcha) o 0 (paro): ");
+	scanf("%d",&v);		
+				
+			if(v==1){
+				
+				printf("\nHas puesto el modo marcha porfavor ingrese el tiempo de muestreo que desea en segundos: ");
+				scanf("%d",&t1);
+				printf("\nIngrese el numero de muestras de las que desea hacer la mediana: ");
+				scanf("%d",&nmediana);
+				printf("\nSe hara el muestreo de %d segundos y se hara la media con %d muestras\n",t1,nmediana);
+				sprintf(missatge, "AM%i%.2iZ",v,t1,nmediana);
 			}
-			while (mostres <01 || mostres>9) 	//protección valores erroneos
-			{
-				printf("Numero de mostres per fer la mitjana(1-9):");
-				scanf("%i", &mostres);
+
+			else{				
+				
+				printf("\nHa puesto el modo paro\n");
+				sprintf(missatge, "{M000}");
 			}
-			sprintf(missatge,"AM%i%.2iZ",v,t);	//cargem a la variable a enviar les dades
-			break;
-		}
-		else if (v==0)							//si se presiona finalizar volvemos a preguntar
-		{ 
-			printf("Adquisicio aturada.\n");
-			sprintf(missatge,"AM000Z");			//cargem a la variable a enviar les dades
-		}
-	}
+
 }
 	
 void LED (){
@@ -392,27 +401,5 @@ void convertidor(){
 		sprintf(lecturatemp,"%c%c%c%c%c",buf[3],buf[4],buf[5],buf[6],buf[7]);
 		temp=atof(lecturatemp);  //convierte a float
 }
-void adquirir_muestra (int N) {
-		
-    float suma=0;
-    
-    muestra = (float*)malloc(N*sizeof(float*));
-    
-		if (muestra == NULL) {
-			printf("Error array. No se ha podido reservar memoria.\n");
-		}
-        
-        /*CREA LOS VALORES EN EL ARRAY*/
-		
-        else {                
-            
 
-            for(i=0; i<N; i++) {
-                *(muestra+i)=temp;
-               // printf("%.2f ;",*(muestra+i));
-                suma = suma + *(muestra+i);
-            }
-               // printf("\n%2.f",suma);
-                cola_circular (suma,N);
-	}
 }

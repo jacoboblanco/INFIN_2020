@@ -44,9 +44,7 @@ ISR(TIMER1_COMPA_vect){
         if ((i>=tiempo_muestreo) && (valor_MarchaParo==1)) {                        
         
                 lectura = analogRead(A0);
-
-                digitalWrite(ledPin, digitalRead(ledPin)^1);
-                
+     
                 i=0;     
         } 
 }
@@ -133,12 +131,10 @@ void comandaM(){
 void comandaE() {  
 
     int pin;
-    bool ValorEntrada;
-    ValorEntrada=digitalRead(pin);  
+    bool ValorEntrada=digitalRead(pin);  
   
     pin = (entrada_consola[2]-'0')*10+(entrada_consola[3]-'0');           
-    pinMode(pin, INPUT); 
-                  
+    pinMode(pin, INPUT);                   
      
   
          if (entrada_consola[4]!='Z') {     // ERROR_protocol: la 'Z' no està en la posició correcta.
@@ -170,11 +166,11 @@ void comandaE() {
 void comandaS(){
     
     int pin;
-    bool ValorSortida;
+    bool ValorSortida=digitalRead(pin);;
 
       ValorSortida = (entrada_consola[4]-'0');
       pin = (entrada_consola[2]-'0')*10+(entrada_consola[3]-'0');  
-
+    
         if (entrada_consola[5]!='Z') {         // ERROR_protocol: la 'Z' no està en la posició correcta.
               Serial.print("AS1Z\n");        // Missatge ERROR 1 per la operació 'S'.;
         }

@@ -43,12 +43,12 @@ int w=0;                          //Variable que se utiliza para encender y apag
 
 //FUNCIONES UTILIZADAS
 
-void guardar();                                 //Función que realiza la lecutra, guarda la muestra, llena los registros de máx mín, y calcula la media
+void guardar(float temperatura);                                 //Función que realiza la lecutra, guarda la muestra, llena los registros de máx mín, y calcula la media
 void cola_circular(float sumatorio, int x);     //Gurada el valor de la media en el vector circular.
 void adquisicion ();                            //Función que lee los valores que se introducen por la terminal (tiempo, media, marcha y paro)
 void LED ();                                    //Función para pagar y encender el LED
-void convertidor();                             //Convierte la muestra de digital a grados centígrados
-void adquirir_muestra (int N);                  //Recoge los datos que le llegan del arduino
+float convertidor();                             //Convierte la muestra de digital a grados centígrados
+void adquirir_muestra (int N,float temperatura);                  //Recoge los datos que le llegan del arduino
 void Enviar(int fd,char *missatge);         	//Función que se uttiliza para enviar datos por el puerto serie
 void Rebre(int fd,char *buf);		            //Función que se uttiliza para recibir datos por el puerto serie
 int	ConfigurarSerie(void);			            //Configuración del puerto serie
@@ -65,7 +65,6 @@ int main(int argc, char **argv) {
 
 	adquisicion();   
 	Enviar(fd,missatge);
-	sleep(1);
 	Rebre(fd,buf);
     
     /*Se utiliza un while(1) para crear un bucle itinerante*/

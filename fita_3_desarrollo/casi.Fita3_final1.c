@@ -18,60 +18,73 @@
 #include <sys/ioctl.h>     
  
 #define BAUDRATE B9600                                                
-#define MODEMDEVICE "/dev/ttyS0"        //Conexió IGEP - Arduino
-//#define MODEMDEVICE "/dev/ttyUSB0"        //Conexió directa PC(Linux) - Arduino                                   
+//#define MODEMDEVICE "/dev/ttyS0"        //Conexió IGEP - Arduino
+#define MODEMDEVICE "/dev/ttyACM0"         //Conexió directa PC(Linux) - Arduino                                   
 #define _POSIX_SOURCE 1 /* POSIX compliant source */                       
-#define t_max 100                                                           
-                                                         
-struct termios oldtio,newtio;                                                           
-char buf[255];
-char missatge[255];                                           
-int unsigned frente=0;
-int unsigned n=0;
-float *muestra;
-float datos[t_max];
-int menor;
-int mayor;
-int tiempo;
-int nmediana=0;
-int j=0;
-int fd, i = 0, res;                                                           
-	
-void guardar();
-void cola_circular(float sumatorio, int x);
-void adquisicion ();  
-void LED ();
-void convertidor();
-void adquirir_muestra (int N);  
-void Enviar(int fd,char *missatge);	//Subrutina per a enviar dades per el port serie
-void Rebre(int fd,char *buf);		//Subrutina per a rebre dades per el port serie
-int	ConfigurarSerie(void);			//Configuració del port serie obert
-void TancarSerie(int fd);			//Tancar comunicació
     
-int main(int argc, char **argv)                                                               
-{                                                                          
-	
+#define t_max 100                 //Tamaño máximo del array de muestras      
+                                    
+//VARIABLES GLOBALES                                                         
 
-	fd = ConfigurarSerie();
+struct termios oldtio,newtio;                                                           
+char buf[255];                    //Espacio de memoria para guardar lo que recibe del arduino
+char missatge[255];               //Protocolo que se envia al arduino                            
+int unsigned frente=0;            //Posición 0 de la cola circular
+int unsigned n=0;                 //Número de muestra
+float *muestra;                   //Vector dinámico que se utiliza en la cola circular
+float datos[t_max];               //Vector donde se guardan los datos en la cola circular
+float menor;                      //Variable para guardar la muestra mínima
+float mayor;                      //Variable para guardar la muestra máxima
+int tiempo;                       //Tiempo en el que se hacen las muestras
+int nmediana=0;                   //Número de muestras con el que se quiere hacer la muestra
+int j=0;                          //Contador que marca la posición a la que apunta la cola circular
+int fd, i = 0, res;               //Variables que se utilizan para comunicación serial                                             
+int w=0;                          //Variable que se utiliza para encender y apagar el LED
+
+//FUNCIONES UTILIZADAS
+
+void guardar(float temperatura);                                 //Función que realiza la lecutra, guarda la muestra, llena los registros de máx mín, y calcula la media
+void cola_circular(float temperatura);     //Gurada el valor de la media en el vector circular.
+void adquisicion ();                            //Función que lee los valores que se introducen por la terminal (tiempo, media, marcha y paro)
+void LED ();                                    //Función para pagar y encender el LED
+float convertidor();                             //Convierte la muestra de digital a grados centígrados
+void adquirir_muestra (int N,float temperatura);                  //Recoge los datos que le llegan del arduino
+void Enviar(int fd,char *missatge);         	//Función que se uttiliza para enviar datos por el puerto serie
+void Rebre(int fd,char *buf);		            //Función que se uttiliza para recibir datos por el puerto serie
+int	ConfigurarSerie(void);			            //Configuración del puerto serie
+void TancarSerie(int fd);			            //Función que se utiliza para cerrar la comunicación con el puerto serie
+float Media(int numero);
+
+
+    
+int main(int argc, char **argv) {                                                                          
+ 
+ float temperatura;
+ float mediana;
+ 
+	fd = ConfigurarSerie();                                                                                                                                            
 
 	adquisicion();   
 	Enviar(fd,missatge);
-	sleep(1);
 	Rebre(fd,buf);
-          
-	while(1){
-		LED ();
-		convertidor();
-		guardar();
+    
+    /*Se utiliza un while(1) para crear un bucle itinerante*/
+         
+	while(1){ 
+      
+		LED ();  
+		temperatura=convertidor();
+		guardar(temperatura);
+		mediana=Media(nmediana);
+		printf("\nMedia: %.2f\n",mediana); 
 	}   
 		                                                      
 	TancarSerie(fd);
 	
 	return 0;
-}
-             		
-int	ConfigurarSerie(void)
-{
+}           		
+
+int	ConfigurarSerie(void) {
 	int fd;                                                           
 
 
@@ -95,30 +108,28 @@ int	ConfigurarSerie(void)
 	tcflush(fd, TCIFLUSH);                                                  
 	tcsetattr(fd,TCSANOW,&newtio);
 	
-	sleep(2); //Per donar temps a que l'Arduino es recuperi del RESET
-	
+		
+ 	sleep(2); //Per donar temps a que l'Arduino es recuperi del RESET
+		
 	return fd;
 }               
 
-void TancarSerie(int fd)
-{
+void TancarSerie(int fd) {
 	tcsetattr(fd,TCSANOW,&oldtio);
 	close(fd);
-}              
+}  
               
-void Enviar(int fd,char *missatge)
-{
+void Enviar(int fd,char *missatge) {
 	int res=0;
 	
 	res = write(fd,missatge,strlen(missatge));
 	
 	if (res <0) {tcsetattr(fd,TCSANOW,&oldtio); perror(MODEMDEVICE); exit(-1); }
 	
-	printf("Enviats %d bytes: %s\n",res,missatge);	//***********************************************************************************************************
+	//printf("Enviats %d bytes: %s\n",res,missatge);
 }
               
-void Rebre(int fd,char *buf)
-{
+void Rebre(int fd,char *buf) {
 	int k = 0;
 	int res = 0;
 	int bytes = 0;
@@ -130,13 +141,12 @@ void Rebre(int fd,char *buf)
 		res = res + read(fd,buf+k,1);
 		k++;
 	}
-	while (buf[k-1] != 'Z');	//PARA CUANDO LEA EL FINAL DEL PROTOCOLO
-	//hay que crear una variable donde esten todo los RES concatenados
-	printf("Rebuts %d bytes: %s\n",res,buf);	//***********************************************************************************************************
+	while (buf[k-1] != 'Z');	
+	
+	//printf("Rebuts %d bytes: %s\n",res,buf);
 }
-void LED (){
 
-	int w=0;
+void LED() {
 
 	if (w==0){
 		w=1; 
@@ -151,22 +161,21 @@ void LED (){
 		Rebre(fd,buf);
 	} 
 
-void adquisicion (){
+void adquisicion() {
 	
 	int v;
-
 
 	printf("\nSeleccione el modo que desea: 1 (marcha) o 0 (paro): ");
 	scanf("%d",&v);		
 				
 			if(v==1){
 				
-				printf("\nHas puesto el modo marcha porfavor ingrese el tiempo de muestreo que desea en segundos: ");
+				printf("\nTiempo de muestreo que desea en segundos: ");
 				scanf("%d",&tiempo);
-				printf("\nIngrese el numero de muestras de las que desea hacer la mediana: ");
+				printf("\nNumero de muestras de las que desea hacer la mediana: ");
 				scanf("%d",&nmediana);
 				printf("\nSe hara el muestreo de %d segundos y se hara la media con %d muestras\n",tiempo,nmediana);
-				sprintf(missatge, "AM%d%.2d%dZ",v,tiempo,nmediana);
+				sprintf(missatge, "AM%d%.2dZ",v,tiempo);
 			}
 
 			else{				
@@ -176,11 +185,9 @@ void adquisicion (){
 			}
 }		
 				
-void guardar(){
+void guardar(float temperatura) {
                    
-        adquirir_muestra(nmediana);        
-
-      
+     adquirir_muestra(nmediana, temperatura);        
     
     /*LLENAR REGISTRO DE MAYOR */  
         mayor = datos[0];
@@ -190,7 +197,6 @@ void guardar(){
                 mayor=datos[i];
                 }
             }   
-    printf("%d",mayor);
     /*LLENAR REGISTRO DE MENOR */
             menor = datos[0];
             
@@ -198,63 +204,74 @@ void guardar(){
                 if (datos[i]<menor){
                 menor=datos[i];
                 }
-            }     
+            } 
+                
+        printf("Maximo: %.2f\nMinimo: %.2f\n",mayor,menor);
     }
 
-		
-//FUNCION PARA ADQUIRIR MUESTRAS EN EL ARRAY
+float Media(int numero) {
 
-void adquirir_muestra (int N) {
+	float suma=0;
+	float m=0;
+	int valor=0; //
+	
+	for(i=0; i<numero; i++) {
+        datos[n-i]=valor;
+        suma = suma + valor;
+    }
+     
+	m = suma/numero;
+	
+	return m;
+
+}
+
+void adquirir_muestra(int N, float temperatura) {
 		
     float suma=0;
-    float lectura_ard=0;
+
     muestra = (float*)malloc(N*sizeof(float*));
 
 		if (muestra == NULL) {
 			printf("Error array. No se ha podido reservar memoria.\n");
 		}
-        
-        /*CREA LOS VALORES EN EL ARRAY*/
 		
         else {                
         
             for(i=0; i<N; i++) {
-                *(muestra+i)=lectura_ard;
-               // printf("%.2f ;",*(muestra+i));
-                suma = suma + *(muestra+i);
+                *(muestra+i)=temperatura;
             }
-               // printf("\n%2.f",suma);
-                cola_circular (suma,N);
+                cola_circular (temperatura);
 	}
 }
-
-//FUNCION DE GUARDAR MUESTRAS EN EL ARRAY
         
-void cola_circular (float sumatorio, int x) {
-    
-    float entrada = 0;    
+void cola_circular(float temperatura) {    
     
         j=(frente+n)%t_max;              
-        entrada = sumatorio/x;
-        datos[j]=entrada;
+        //entrada = sumatorio/x;
+        datos[j]=temperatura;
+        //printf("\nMedia: %.2f\n",entrada);       
         n++;
 }
         
-void convertidor(){	
- 
+float convertidor() {	
+	
+	float temperatura;      //Variable que se utiliza para pasar el valor de la temperatura a grados centígrados
 	char lecturatemp[7];
-	float temperatura=0;
+
 	float temp;
 
 		sprintf(missatge,"ACZ"); 
 		Enviar(fd,missatge);
-		sleep(tiempo);    //se queda leiendo el tiempo t previamente introducido 
+		sleep(tiempo);    
 		Rebre(fd,buf);
 
 		sprintf(lecturatemp,"%c%c%c%c%c",buf[3],buf[4],buf[5],buf[6],buf[7]);
 
-		temp=atof(lecturatemp);  //convierte a float printf("Introduzca un valor entre 0 y 1023\n"); 
+		temp=atof(lecturatemp);  //convierte a float
 
 		temperatura=temp*5/1023;
-		printf("%f",temperatura);
+		printf("\nMuestra(%d):%.2f\n",n,temperatura);
+		
+	return temperatura; 
  }

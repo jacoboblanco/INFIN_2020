@@ -1,7 +1,3 @@
-// cd Descargas
-// gcc Fita3_final1.c -o fita
-// ./fita
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>                                                    
@@ -60,21 +56,16 @@ int main(int argc, char **argv)
 {                                                                          
 
 	fd = ConfigurarSerie();                                                                         
-
-	memset(missatge,'\0', 255);
-	memset(buf,'\0', 255);                                                                         
+                                                                         
 
 	adquisicion();   
 	Enviar(fd,missatge);
 	sleep(1);
 	Rebre(fd,buf);
           
-	while(1){
-		LED ();   
-                                                                                
-        memset(missatge,'\0', 255);
-		memset(buf,'\0', 255);                                                                 
-
+	while(1){ 
+      
+		LED ();  
 		convertidor();
 		guardar();
 	}   
@@ -272,5 +263,5 @@ void convertidor(){
 		temp=atof(lecturatemp);  //convierte a float printf("Introduzca un valor entre 0 y 1023\n"); 
 
 		temperatura=temp*5/1023;
-		printf("\nMuestra(%d):%f\n",n,temperatura);
+		printf("\nMuestra(%d):%.2f\n",n,temperatura);
  }
